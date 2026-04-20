@@ -1,10 +1,41 @@
-HELP.md
+############################################
+# BUILD
+############################################
 target/
-.mvn/wrapper/maven-wrapper.jar
+build/
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+############################################
+# MAVEN
+############################################
+.mvn/wrapper/maven-wrapper.jar
+
+############################################
+# LOGS
+############################################
+*.log
+logs/
+
+############################################
+# OS FILES
+############################################
+.DS_Store
+Thumbs.db
+
+############################################
+# IDE
+############################################
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse / STS ###
 .apt_generated
 .classpath
 .factorypath
@@ -13,27 +44,47 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
 
-### Environment ###
+############################################
+# ENVIRONMENT
+############################################
 .env
+.env.*
 
-### Application secrets ###
-application.properties
+############################################
+# APPLICATION CONFIG (⚠️ QUAN TRỌNG)
+############################################
+application*.yml
+application*.yaml
+application*.properties
+
+# nhưng cho phép file mẫu
+!application-example.yml
+!application-example.yaml
+!application-example.properties
+
+############################################
+# DOCKER
+############################################
+docker-compose.override.yml
+
+############################################
+# TEMP FILES
+############################################
+*.tmp
+*.swp
+*.swo
+
+############################################
+# TEST OUTPUT
+############################################
+coverage/
