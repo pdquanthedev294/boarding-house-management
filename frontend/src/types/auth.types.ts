@@ -25,3 +25,18 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
 }
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface RegisterApiResponse {
+  status: number;
+  message: string;
+  data: {
+    id: string;
+    email: string;
+  };
+}

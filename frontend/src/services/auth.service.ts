@@ -1,8 +1,14 @@
 import { authApi } from "@/api/auth/auth.api";
-import type { LoginRequest, LoginApiResponse } from "@/types/auth.types";
+import type { LoginRequest, LoginApiResponse, RegisterRequest } from "@/types/auth.types";
 
-const loginService = async (data: LoginRequest): Promise<LoginApiResponse> => {
+export const loginService = async (data: LoginRequest): Promise<LoginApiResponse> => {
   return await authApi.login(data);
 };
 
-export default loginService;
+export const registerService = async (data: RegisterRequest) => {
+  return await authApi.register(data);
+};
+
+export const logoutService = async (): Promise<void> => {
+  return await authApi.logout();
+};
