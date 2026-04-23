@@ -1,18 +1,40 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { AuthState } from "@/types/auth.types";
-import { loginThunk, logoutThunk, registerThunk } from "./auth.thunk";
+import {
+  forgotPasswordThunk,
+  loginThunk,
+  logoutThunk,
+  registerThunk,
+  resendOtpThunk,
+  resetPasswordThunk,
+  verifyOtpThunk,
+} from "./auth.thunk";
 
 const initialState: AuthState = {
   user: null,
   accessToken: localStorage.getItem("token"),
   loading: false,
   error: null,
+
+  forgotEmail: null,
+  step: 1,
+  otpExpire: 0,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    setStep: (state, action) => {
+      state.step = action.payload;
+    },
+
+    resetForgotFlow: (state) => {
+      state.step = 1;
+      state.forgotEmail = null;
+      state.otpExpire = 0;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // LOGIN
@@ -48,6 +70,34 @@ const authSlice = createSlice({
         state.user = null;
         state.accessToken = null;
         state.error = null;
+      })
+
+      // SEND EMAIL
+      .addCase(forgotPasswordThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.forgotEmail = action.meta.arg.email;
+        state.step = 2;
+
+        // OTP hết hạn sau 60s
+        state.otpExpire = Date.now() + 60000;
+      })
+
+      // VERIFY OTP
+      .addCase(verifyOtpThunk.fulfilled, (state) => {
+        state.loading = false;
+        state.step = 3;
+      })
+
+      // RESET PASSWORD
+      .addCase(resetPasswordThunk.fulfilled, (state) => {
+        state.loading = false;
+        state.step = 1;
+        state.forgotEmail = null;
+      })
+
+      // RESEND OTP
+      .addCase(resendOtpThunk.fulfilled, (state) => {
+        state.otpExpire = Date.now() + 60000;
       });
   },
 });
