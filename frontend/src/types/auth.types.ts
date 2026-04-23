@@ -28,7 +28,7 @@ export interface AuthState {
 
   forgotEmail: string | null;
   step: 1 | 2 | 3;
-  otpExpire: number; // timestamp
+  otpExpire: number;
 }
 
 // Register

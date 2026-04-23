@@ -7,9 +7,20 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import vn.backend.backend.dto.request.auth.SignUpRequest;
 import vn.backend.backend.dto.request.auth.SignInRequest;
 import vn.backend.backend.dto.response.auth.TokenResponse;
+import vn.backend.backend.entities.RoleEntity;
+import vn.backend.backend.entities.UserEntity;
+import vn.backend.backend.entities.UserHasRoleEntity;
+import vn.backend.backend.enums.UserStatus;
+import vn.backend.backend.exception.InvalidDataException;
+import vn.backend.backend.mapper.UserMapper;
+import vn.backend.backend.repository.RoleRepository;
+import vn.backend.backend.repository.UserHasRoleRepository;
 import vn.backend.backend.repository.UserRepository;
 import vn.backend.backend.service.AuthenticationService;
 import vn.backend.backend.service.JwtService;
@@ -26,6 +37,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final UserRepository userRepository;
   private final AuthenticationManager authenticationManager;
   private final JwtService jwtService;
+  private final UserMapper userMapper;
+  private final PasswordEncoder passwordEncoder;
+  private final RoleRepository roleRepository;
+  private final UserHasRoleRepository userHasRoleRepository;
 
   @Override
   public TokenResponse getAccessToken(SignInRequest request) {
@@ -63,5 +78,51 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public TokenResponse getRefreshToken(String request) {
     return null;
+  }
+
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public TokenResponse register(SignUpRequest request) {
+
+    String email = request.getEmail().trim().toLowerCase();
+
+    if (userRepository.existsByEmail(email)) {
+      throw new InvalidDataException("Email already exists");
+    }
+
+    UserEntity user = userMapper.toEntity(request);
+
+    user.setEmail(email);
+    user.setUsername(email);
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    user.setStatus(UserStatus.ACTIVE);
+
+    // 4. save user
+    userRepository.save(user);
+
+    // 5. lấy role mặc định
+    RoleEntity role = roleRepository.findByName("user")
+      .orElseThrow(() -> new RuntimeException("Role USER not found"));
+
+    log.info("Role = {}", role);
+
+    // 6. save user_has_role
+    UserHasRoleEntity userRole = new UserHasRoleEntity();
+    userRole.setUser(user);
+    userRole.setRole(role);
+
+    userHasRoleRepository.save(userRole);
+
+    // 7. tạo token
+    List<String> authorities = List.of(role.getName());
+
+    String accessToken = jwtService.generateAccessToken(
+      user.getEmail(),
+      authorities
+    );
+
+    return TokenResponse.builder()
+      .accessToken(accessToken)
+      .build();
   }
 }

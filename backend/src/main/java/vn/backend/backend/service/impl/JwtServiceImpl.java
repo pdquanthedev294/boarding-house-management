@@ -44,9 +44,26 @@ public class JwtServiceImpl implements JwtService {
   public String generateAccessToken(String email, List<String> authorities) {
     log.info("Generate access token for email {} with authorities {}", email, authorities);
 
+    List<String> roles = authorities.stream()
+      .filter(Objects::nonNull)
+      .map(Object::toString)
+      .map(role -> {
+        String r = String.valueOf(role).
+          replace("[", "").
+          replace("]", "")
+          .toUpperCase();
+
+        if (r.startsWith("ROLE_")) {
+          return r;
+        }
+        return "ROLE_" + r;
+      })
+      .distinct()
+      .toList();
+
     Map<String, Object> claims = new HashMap<>();
     claims.put("email", email);
-    claims.put("roles", authorities);
+    claims.put("roles", roles);
 
     return generateToken(claims, email);
   }

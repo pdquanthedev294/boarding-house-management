@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import vn.backend.backend.enums.Gender;
 import vn.backend.backend.enums.UserStatus;
@@ -62,7 +63,11 @@ public class UserEntity extends Abstract<Long> implements UserDetails, Serializa
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of();
+    return roles.stream()
+      .map(r -> new SimpleGrantedAuthority(
+        "ROLE_" + r.getRole().getName()
+      ))
+      .toList();
   }
 
   @Override

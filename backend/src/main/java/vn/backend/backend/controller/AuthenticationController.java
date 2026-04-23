@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import vn.backend.backend.dto.request.auth.SignUpRequest;
 import vn.backend.backend.dto.request.auth.SignInRequest;
 import vn.backend.backend.dto.response.auth.TokenResponse;
 import vn.backend.backend.dto.response.common.ApiResponse;
@@ -40,5 +41,19 @@ public class AuthenticationController {
   public TokenResponse getRefreshToken(@RequestBody String refreshToken) {
     log.info("Refresh token request");
     return TokenResponse.builder().accessToken("DUMMY-NEW-ACCESS-TOKEN").refreshToken("DUMMY-REFRESH-TOKEN").build();
+  }
+
+  @Operation(summary = "Register", description = "Create new user account")
+  @PostMapping("/register")
+  public ApiResponse register(@RequestBody SignUpRequest request) {
+    log.info("Register request: {}", request.getEmail());
+
+    TokenResponse token = authenticationService.register(request);
+
+    return ApiResponse.builder()
+      .status(200)
+      .message("Register success")
+      .data(token)
+      .build();
   }
 }

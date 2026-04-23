@@ -1,42 +1,35 @@
 import api from "@/lib/axios";
 import type {
   LoginRequest,
-  LoginApiResponse,
-  RegisterApiResponse,
   RegisterRequest,
   ResetPasswordRequest,
   VerifyOtpRequest,
   ForgotPasswordRequest,
 } from "@/types/auth.types";
+import type { ApiResponse } from "@/types/api-response";
+
+// response data
+type TokenResponse = {
+  accessToken: string;
+  refreshToken?: string;
+};
 
 export const authApi = {
-  login: async (data: LoginRequest): Promise<LoginApiResponse> => {
-    const res = await api.post("/auth/access-token", data);
-    return res.data;
-  },
+  login: (data: LoginRequest) =>
+    api.post<ApiResponse<TokenResponse>>("/auth/access-token", data),
 
-  register: async (data: RegisterRequest): Promise<RegisterApiResponse> => {
-    const res = await api.post("/auth/register", data);
-    return res.data;
-  },
+  register: (data: RegisterRequest) =>
+    api.post<ApiResponse<TokenResponse>>("/auth/register", data),
 
-  logout: async (): Promise<void> => {
-    const res = await api.post("/auth/logout");
-    return res.data;
-  },
+  logout: () =>
+    api.post<ApiResponse<null>>("/auth/logout"),
 
-  forgotPassword: async (data: ForgotPasswordRequest) => {
-    const res = await api.post("/auth/forgot-password", data);
-    return res.data;
-  },
+  forgotPassword: (data: ForgotPasswordRequest) =>
+    api.post<ApiResponse<null>>("/auth/forgot-password", data),
 
-  verifyOtp: async (data: VerifyOtpRequest) => {
-    const res = await api.post("/auth/verify-otp", data);
-    return res.data;
-  },
+  verifyOtp: (data: VerifyOtpRequest) =>
+    api.post<ApiResponse<null>>("/auth/verify-otp", data),
 
-  resetPassword: async (data: ResetPasswordRequest) => {
-    const res = await api.post("/auth/reset-password", data);
-    return res.data;
-  },
+  resetPassword: (data: ResetPasswordRequest) =>
+    api.post<ApiResponse<null>>("/auth/reset-password", data),
 };

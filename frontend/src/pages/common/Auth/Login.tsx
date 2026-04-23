@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import { loginThunk } from "@/features/auth/auth.thunk";
+import { getRedirectPath } from "@/utils/jwt";
 
 const Login = () => {
   const dispatch = useAppDispatch();
@@ -28,9 +29,9 @@ const Login = () => {
     const result = await dispatch(loginThunk(form));
 
     if (loginThunk.fulfilled.match(result)) {
-      console.log(result.payload);
       toast.success("Đăng nhập thành công");
-      navigate("/admin/dashboard");
+      const redirectPath = getRedirectPath();
+      navigate(redirectPath);
     } else {
       toast.error("Đăng nhập thất bại");
     }

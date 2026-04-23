@@ -1,27 +1,54 @@
 import { authApi } from "@/api/auth/auth.api";
-import type { LoginRequest, LoginApiResponse, RegisterRequest, ResetPasswordRequest, VerifyOtpRequest, ForgotPasswordRequest } from "@/types/auth.types";
+import type {
+  LoginRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+  VerifyOtpRequest,
+  ForgotPasswordRequest,
+} from "@/types/auth.types";
+import type { ApiResponse } from "@/types/api-response";
 
-export const loginService = async (data: LoginRequest): Promise<LoginApiResponse> => {
-  return await authApi.login(data);
+type TokenResponse = {
+  accessToken: string;
+  refreshToken?: string;
 };
 
-export const registerService = async (data: RegisterRequest) => {
-  return await authApi.register(data);
+export const loginService = async (
+  data: LoginRequest
+): Promise<ApiResponse<TokenResponse>> => {
+  const res = await authApi.login(data);
+  return res.data;
 };
 
-export const logoutService = async (): Promise<void> => {
-  return await authApi.logout();
+export const registerService = async (
+  data: RegisterRequest
+): Promise<ApiResponse<TokenResponse>> => {
+  const res = await authApi.register(data);
+  return res.data;
 };
 
-
-export const forgotPasswordService = (data: ForgotPasswordRequest) => {
-  return authApi.forgotPassword(data);
+export const logoutService = async (): Promise<ApiResponse<null>> => {
+  const res = await authApi.logout();
+  return res.data;
 };
 
-export const verifyOtpService = (data: VerifyOtpRequest) => {
-  return authApi.verifyOtp(data);
+export const forgotPasswordService = async (
+  data: ForgotPasswordRequest
+): Promise<ApiResponse<null>> => {
+  const res = await authApi.forgotPassword(data);
+  return res.data;
 };
 
-export const resetPasswordService = (data: ResetPasswordRequest) => {
-  return authApi.resetPassword(data);
+export const verifyOtpService = async (
+  data: VerifyOtpRequest
+): Promise<ApiResponse<null>> => {
+  const res = await authApi.verifyOtp(data);
+  return res.data;
+};
+
+export const resetPasswordService = async (
+  data: ResetPasswordRequest
+): Promise<ApiResponse<null>> => {
+  const res = await authApi.resetPassword(data);
+  return res.data;
 };

@@ -2,6 +2,7 @@ package vn.backend.backend.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import vn.backend.backend.dto.request.auth.SignUpRequest;
 import vn.backend.backend.dto.request.user.CreateUserRequest;
 import vn.backend.backend.dto.request.user.UserAddressRequest;
 import vn.backend.backend.entities.AddressEntity;
@@ -15,6 +16,14 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+  // ===== REGISTER =====
+  @Mapping(target = "password", ignore = true)
+  @Mapping(target = "gender", ignore = true)
+  @Mapping(target = "type", ignore = true)
+  @Mapping(target = "status", constant = "ACTIVE")
+  UserEntity toEntity(SignUpRequest req);
+
+  // ===== ADMIN CREATE =====
   @Mapping(target = "password", ignore = true) // xử lý ở service
   @Mapping(target = "gender", expression = "java(mapGender(req.getGender()))")
   @Mapping(target = "type", expression = "java(mapType(req.getType()))")

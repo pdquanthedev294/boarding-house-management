@@ -102,7 +102,8 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
   private static final List<BypassRule> RULES = List.of(
     new BypassRule("/auth/access-token", "POST"),
     new BypassRule("/swagger-ui/**", null),
-    new BypassRule("/v3/api-docs/**", null)
+    new BypassRule("/v3/api-docs/**", null),
+    new BypassRule("/auth/**", null)
   );
 
   private boolean isBypassToken(@NonNull HttpServletRequest request) {
