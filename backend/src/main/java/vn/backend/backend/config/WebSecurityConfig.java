@@ -27,7 +27,7 @@ public class WebSecurityConfig {
       .addFilterBefore(customizeRequestFilter, UsernamePasswordAuthenticationFilter.class)
       .authorizeHttpRequests(request -> request
         .requestMatchers("/auth/**").permitAll()
-//        .requestMatchers("/user/**").permitAll()
+        .requestMatchers("/room/**").permitAll()
         .anyRequest().authenticated()
       );
 

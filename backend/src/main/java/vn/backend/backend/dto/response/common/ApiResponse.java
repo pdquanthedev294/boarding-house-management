@@ -7,8 +7,8 @@ import lombok.Setter;
 @Setter
 @Getter
 @Builder
-public class ApiResponse {
+public class ApiResponse<T> {
   private int status;
   private String message;
-  private transient Object data;
+  private transient T data;
 }
