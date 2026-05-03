@@ -65,12 +65,35 @@ public class JwtServiceImpl implements JwtService {
     claims.put("email", email);
     claims.put("roles", roles);
 
-    return generateToken(claims, email);
+    return generateToken(claims, email, ACCESS_TOKEN);
   }
 
   @Override
   public String generateRefreshToken(String email, List<String> authorities) {
-    return "";
+    log.info("Generate refresh token for email {} with authorities {}", email, authorities);
+
+    List<String> roles = authorities.stream()
+      .filter(Objects::nonNull)
+      .map(Object::toString)
+      .map(role -> {
+        String r = String.valueOf(role)
+          .replace("[", "")
+          .replace("]", "")
+          .toUpperCase();
+
+        if (r.startsWith("ROLE_")) {
+          return r;
+        }
+        return "ROLE_" + r;
+      })
+      .distinct()
+      .toList();
+
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("email", email);
+    claims.put("roles", roles);
+
+    return generateToken(claims, email, REFRESH_TOKEN);
   }
 
   @Override
@@ -95,14 +118,20 @@ public class JwtServiceImpl implements JwtService {
     }
   }
 
-  private String generateToken(Map<String, Object> claims, String email) {
-    log.info("Generate access token for user {} with name {}", email, claims);
+  private String generateToken(Map<String, Object> claims, String email, TokenType type) {
+    log.info("Generate {} token for user {} with claims {}", type, email, claims);
+
+    long expirationMillis = switch (type) {
+      case ACCESS_TOKEN -> 1000L * 60 * expiryMinutes;
+      case REFRESH_TOKEN -> 1000L * 60 * 60 * 24 * expiryDay;
+    };
+
     return Jwts.builder()
       .setClaims(claims)
       .setSubject(email)
       .setIssuedAt(new Date())
-      .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * expiryMinutes))
-      .signWith(getKey(ACCESS_TOKEN), SignatureAlgorithm.HS256)
+      .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+      .signWith(getKey(type), SignatureAlgorithm.HS256)
       .compact();
   }
 

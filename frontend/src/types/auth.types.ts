@@ -15,6 +15,7 @@ export interface LoginApiResponse {
 
 export interface AuthResponse {
   accessToken: string;
+  refreshToken?: string | null;
   user: {
     email: string;
   };
@@ -23,6 +24,7 @@ export interface AuthResponse {
 export interface AuthState {
   user: AuthResponse["user"] | null;
   accessToken: string | null;
+  refreshToken: string | null;
   loading: boolean;
   error: string | null;
 

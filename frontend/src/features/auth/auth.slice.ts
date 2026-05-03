@@ -13,6 +13,7 @@ import {
 const initialState: AuthState = {
   user: null,
   accessToken: localStorage.getItem("token"),
+  refreshToken: localStorage.getItem("refreshToken"),
   loading: false,
   error: null,
 
@@ -46,6 +47,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken || null;
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
@@ -69,6 +71,7 @@ const authSlice = createSlice({
       .addCase(logoutThunk.fulfilled, (state) => {
         state.user = null;
         state.accessToken = null;
+        state.refreshToken = null;
         state.error = null;
       })
 

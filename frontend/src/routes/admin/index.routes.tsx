@@ -1,4 +1,5 @@
 import AdminLayout from "@/layouts/admin/AdminLayout";
+import RequireAuth from "@/components/RequireAuth";
 import dashoardRoutes from "./dashboard.routes";
 
 const adminRoutes = [
@@ -6,7 +7,11 @@ const adminRoutes = [
     children: [
       {
         path: "/admin",
-        element: <AdminLayout/>,
+        element: (
+          <RequireAuth>
+            <AdminLayout />
+          </RequireAuth>
+        ),
         children: [
           ...dashoardRoutes,
         ]

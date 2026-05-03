@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 type JwtPayload = {
   email: string;
   roles: string[];
+  exp?: number;
 };
 
 export const getUserFromToken = (): JwtPayload | null => {
@@ -13,6 +14,19 @@ export const getUserFromToken = (): JwtPayload | null => {
     return jwtDecode<JwtPayload>(token);
   } catch {
     return null;
+  }
+};
+
+export const isTokenValid = (): boolean => {
+  const token = localStorage.getItem("token");
+  if (!token) return false;
+
+  try {
+    const payload = jwtDecode<JwtPayload>(token);
+    if (!payload?.exp) return false;
+    return payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
   }
 };
 

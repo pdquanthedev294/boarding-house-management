@@ -20,6 +20,13 @@ export const loginService = async (
   return res.data;
 };
 
+export const refreshTokenService = async (
+  refreshToken: string
+): Promise<ApiResponse<TokenResponse>> => {
+  const res = await authApi.refreshToken(refreshToken);
+  return res.data;
+};
+
 export const registerService = async (
   data: RegisterRequest
 ): Promise<ApiResponse<TokenResponse>> => {

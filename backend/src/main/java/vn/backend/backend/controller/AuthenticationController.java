@@ -38,9 +38,14 @@ public class AuthenticationController {
 
   @Operation(summary = "Refresh token", description = "Get new access token by refresh token")
   @PostMapping("/refresh-token")
-  public TokenResponse getRefreshToken(@RequestBody String refreshToken) {
+  public ApiResponse getRefreshToken(@RequestBody String refreshToken) {
     log.info("Refresh token request");
-    return TokenResponse.builder().accessToken("DUMMY-NEW-ACCESS-TOKEN").refreshToken("DUMMY-REFRESH-TOKEN").build();
+    TokenResponse token = authenticationService.getRefreshToken(refreshToken);
+    return ApiResponse.builder()
+      .status(200)
+      .message("success")
+      .data(token)
+      .build();
   }
 
   @Operation(summary = "Register", description = "Create new user account")

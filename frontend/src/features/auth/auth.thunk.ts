@@ -29,10 +29,15 @@ export const loginThunk = createAsyncThunk<
   }
 
   const token = res.data.accessToken;
+  const refreshToken = res.data.refreshToken || null;
   localStorage.setItem("token", token);
+  if (refreshToken) {
+    localStorage.setItem("refreshToken", refreshToken);
+  }
 
   return {
     accessToken: token,
+    refreshToken,
     user: {
       email: data.email,
     },
@@ -67,6 +72,7 @@ export const logoutThunk = createAsyncThunk<
   }
 
   localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
 });
 
 // gửi email
