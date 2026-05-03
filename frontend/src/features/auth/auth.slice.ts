@@ -95,31 +95,63 @@ const authSlice = createSlice({
       })
 
       // SEND EMAIL
+      .addCase(forgotPasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(forgotPasswordThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.forgotEmail = action.meta.arg.email;
         state.step = 2;
-
-        // OTP hết hạn sau 60s
-        state.otpExpire = Date.now() + 60000;
+        state.otpExpire = Date.now() + 600000; // 10 phút
+      })
+      .addCase(forgotPasswordThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Gửi mã OTP thất bại";
       })
 
       // VERIFY OTP
+      .addCase(verifyOtpThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(verifyOtpThunk.fulfilled, (state) => {
         state.loading = false;
         state.step = 3;
       })
+      .addCase(verifyOtpThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Xác thực OTP thất bại";
+      })
 
       // RESET PASSWORD
+      .addCase(resetPasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(resetPasswordThunk.fulfilled, (state) => {
         state.loading = false;
         state.step = 1;
         state.forgotEmail = null;
+        state.error = null;
+      })
+      .addCase(resetPasswordThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Đặt lại mật khẩu thất bại";
       })
 
       // RESEND OTP
+      .addCase(resendOtpThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(resendOtpThunk.fulfilled, (state) => {
-        state.otpExpire = Date.now() + 60000;
+        state.loading = false;
+        state.otpExpire = Date.now() + 600000; // 10 phút
+      })
+      .addCase(resendOtpThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Gửi lại OTP thất bại";
       });
   },
 });

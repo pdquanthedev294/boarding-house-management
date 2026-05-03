@@ -16,22 +16,31 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.backend.backend.dto.request.auth.SignUpRequest;
 import vn.backend.backend.dto.request.auth.SignInRequest;
 import vn.backend.backend.dto.response.auth.TokenResponse;
+import vn.backend.backend.entities.PasswordResetTokenEntity;
 import vn.backend.backend.entities.RoleEntity;
 import vn.backend.backend.entities.UserEntity;
 import vn.backend.backend.entities.UserHasRoleEntity;
 import vn.backend.backend.enums.UserStatus;
 import vn.backend.backend.exception.InvalidDataException;
 import vn.backend.backend.mapper.UserMapper;
+import vn.backend.backend.repository.PasswordResetTokenRepository;
 import vn.backend.backend.repository.RoleRepository;
 import vn.backend.backend.repository.UserHasRoleRepository;
 import vn.backend.backend.repository.UserRepository;
 import vn.backend.backend.common.TokenType;
 import vn.backend.backend.service.AuthenticationService;
+import vn.backend.backend.service.EmailService;
 import vn.backend.backend.service.JwtService;
+import vn.backend.backend.dto.request.auth.ForgotPasswordRequest;
+import vn.backend.backend.dto.request.auth.ResetPasswordRequest;
+import vn.backend.backend.dto.request.auth.VerifyOtpRequest;
 
 import org.springframework.security.core.AuthenticationException;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -46,6 +55,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final PasswordEncoder passwordEncoder;
   private final RoleRepository roleRepository;
   private final UserHasRoleRepository userHasRoleRepository;
+  private final PasswordResetTokenRepository passwordResetTokenRepository;
+  private final EmailService emailService;
+
+  private static final int OTP_LENGTH = 6;
+  private static final int OTP_EXPIRY_MINUTES = 10;
 
   @Override
   public TokenResponse getAccessToken(SignInRequest request) {
@@ -107,6 +121,81 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       .accessToken(accessToken)
       .refreshToken(newRefreshToken)
       .build();
+  }
+
+  @Override
+  public void forgotPassword(ForgotPasswordRequest request) {
+    String email = request.getEmail().trim().toLowerCase();
+    log.info("Forgot password requested for {}", email);
+
+    if (userRepository.findByEmail(email).isEmpty()) {
+      log.warn("Forgot password request submitted for non-existing email {}", email);
+      return;
+    }
+
+    String otp = generateOtp();
+    Date expiresAt = Date.from(Instant.now().plus(OTP_EXPIRY_MINUTES, ChronoUnit.MINUTES));
+
+    passwordResetTokenRepository.save(
+      PasswordResetTokenEntity.builder()
+        .email(email)
+        .otp(otp)
+        .expiresAt(expiresAt)
+        .verified(false)
+        .used(false)
+        .build()
+    );
+
+    emailService.sendPasswordResetOtp(email, otp);
+  }
+
+  @Override
+  public void verifyOtp(VerifyOtpRequest request) {
+    String email = request.getEmail().trim().toLowerCase();
+    log.info("Verify OTP for {}", email);
+
+    PasswordResetTokenEntity token = passwordResetTokenRepository
+      .findFirstByEmailAndOtpAndUsedFalseAndExpiresAtAfterOrderByCreatedAtDesc(
+        email,
+        request.getOtp(),
+        new Date()
+      )
+      .orElseThrow(() -> new InvalidDataException("Invalid or expired OTP"));
+
+    token.setVerified(true);
+    passwordResetTokenRepository.save(token);
+  }
+
+  @Override
+  public void resetPassword(ResetPasswordRequest request) {
+    String email = request.getEmail().trim().toLowerCase();
+    log.info("Reset password for {}", email);
+
+    if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+      throw new InvalidDataException("Passwords do not match");
+    }
+
+    UserEntity user = userRepository.findByEmail(email)
+      .orElseThrow(() -> new InvalidDataException("Email not found"));
+
+    PasswordResetTokenEntity token = passwordResetTokenRepository
+      .findFirstByEmailAndVerifiedTrueAndUsedFalseAndExpiresAtAfterOrderByCreatedAtDesc(
+        email,
+        new Date()
+      )
+      .orElseThrow(() -> new InvalidDataException("OTP must be verified before resetting password"));
+
+    user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    userRepository.save(user);
+
+    token.setUsed(true);
+    passwordResetTokenRepository.save(token);
+  }
+
+  private String generateOtp() {
+    int min = (int) Math.pow(10, OTP_LENGTH - 1);
+    int max = (int) Math.pow(10, OTP_LENGTH) - 1;
+    return String.valueOf(min + (int) (Math.random() * (max - min + 1)));
   }
 
   @Override

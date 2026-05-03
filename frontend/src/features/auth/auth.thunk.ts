@@ -91,60 +91,64 @@ export const logoutThunk = createAsyncThunk<
 
 // gửi email
 export const forgotPasswordThunk = createAsyncThunk<
-  string,
+  void,
   ForgotPasswordRequest,
   { rejectValue: string }
 >("auth/forgot-password", async (data, { rejectWithValue }) => {
-  const res = await forgotPasswordService(data);
-
-  if (res.status >= 400) {
-    return rejectWithValue(res.message || "Forgot password failed");
+  try {
+    const res = await forgotPasswordService(data);
+    if (res.status >= 400) {
+      return rejectWithValue(res.message || "Gửi mã OTP thất bại");
+    }
+  } catch (error) {
+    return rejectWithValue("Gửi mã OTP thất bại");
   }
-
-  return res.message;
 });
 
 // verify OTP
 export const verifyOtpThunk = createAsyncThunk<
-  string,
+  void,
   VerifyOtpRequest,
   { rejectValue: string }
 >("auth/verify-otp", async (data, { rejectWithValue }) => {
-  const res = await verifyOtpService(data);
-
-  if (res.status >= 400) {
-    return rejectWithValue(res.message || "Verify OTP failed");
+  try {
+    const res = await verifyOtpService(data);
+    if (res.status >= 400) {
+      return rejectWithValue(res.message || "Xác thực OTP thất bại");
+    }
+  } catch (error) {
+    return rejectWithValue("Xác thực OTP thất bại");
   }
-
-  return res.message;
 });
 
 // reset password
 export const resetPasswordThunk = createAsyncThunk<
-  string,
+  void,
   ResetPasswordRequest,
   { rejectValue: string }
 >("auth/reset-password", async (data, { rejectWithValue }) => {
-  const res = await resetPasswordService(data);
-
-  if (res.status >= 400) {
-    return rejectWithValue(res.message || "Reset password failed");
+  try {
+    const res = await resetPasswordService(data);
+    if (res.status >= 400) {
+      return rejectWithValue(res.message || "Đặt lại mật khẩu thất bại");
+    }
+  } catch (error) {
+    return rejectWithValue("Đặt lại mật khẩu thất bại");
   }
-
-  return res.message;
 });
 
 // resend OTP
 export const resendOtpThunk = createAsyncThunk<
-  string,
+  void,
   { email: string },
   { rejectValue: string }
 >("auth/resend-otp", async (data, { rejectWithValue }) => {
-  const res = await forgotPasswordService(data);
-
-  if (res.status >= 400) {
-    return rejectWithValue(res.message || "Resend failed");
+  try {
+    const res = await forgotPasswordService(data);
+    if (res.status >= 400) {
+      return rejectWithValue(res.message || "Gửi lại OTP thất bại");
+    }
+  } catch (error) {
+    return rejectWithValue("Gửi lại OTP thất bại");
   }
-
-  return res.message;
 });
