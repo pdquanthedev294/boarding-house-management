@@ -15,6 +15,7 @@ import type {
   ResetPasswordRequest,
 } from "@/types/auth.types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { clearAuthTokens, setAuthTokens } from "./auth.utils";
 
 // LOGIN
 export const loginThunk = createAsyncThunk<
@@ -30,10 +31,7 @@ export const loginThunk = createAsyncThunk<
 
   const token = res.data.accessToken;
   const refreshToken = res.data.refreshToken || null;
-  localStorage.setItem("token", token);
-  if (refreshToken) {
-    localStorage.setItem("refreshToken", refreshToken);
-  }
+  setAuthTokens(token, refreshToken);
 
   return {
     accessToken: token,
@@ -46,7 +44,7 @@ export const loginThunk = createAsyncThunk<
 
 // REGISTER
 export const registerThunk = createAsyncThunk<
-  string,
+  AuthResponse,
   RegisterRequest,
   { rejectValue: string }
 >("auth/register", async (data, { rejectWithValue }) => {
@@ -56,7 +54,20 @@ export const registerThunk = createAsyncThunk<
     return rejectWithValue(res.message || "Register failed");
   }
 
-  return res.message || "Register success";
+  const token = res.data?.accessToken;
+  const refreshToken = res.data?.refreshToken || null;
+
+  if (token) {
+    setAuthTokens(token, refreshToken);
+  }
+
+  return {
+    accessToken: token ?? "",
+    refreshToken,
+    user: {
+      email: data.email,
+    },
+  };
 });
 
 // LOGOUT
@@ -65,14 +76,17 @@ export const logoutThunk = createAsyncThunk<
   void,
   { rejectValue: string }
 >("auth/logout", async (_, { rejectWithValue }) => {
-  const res = await logoutService();
+  try {
+    const res = await logoutService();
 
-  if (res.status >= 400) {
-    return rejectWithValue(res.message || "Logout failed");
+    if (res.status >= 400) {
+      return rejectWithValue(res.message || "Logout failed");
+    }
+  } catch {
+    return rejectWithValue("Logout failed");
+  } finally {
+    clearAuthTokens();
   }
-
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
 });
 
 // gửi email

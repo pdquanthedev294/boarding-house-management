@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import { loginThunk } from "@/features/auth/auth.thunk";
@@ -68,6 +68,20 @@ const Login = () => {
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
+
+        <div className="mt-6 text-center text-sm text-slate-600">
+          <p>
+            <Link to="/forgot-password" className="font-medium text-violet-600 hover:text-violet-700">
+              Quên mật khẩu?
+            </Link>
+          </p>
+          <p className="mt-3">
+            Chưa có tài khoản?{' '}
+            <Link to="/register" className="font-medium text-violet-600 hover:text-violet-700">
+              Đăng ký ngay
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

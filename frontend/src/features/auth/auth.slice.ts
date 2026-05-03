@@ -10,10 +10,14 @@ import {
   verifyOtpThunk,
 } from "./auth.thunk";
 
+import { getAuthTokens } from "./auth.utils";
+
+const { accessToken, refreshToken } = getAuthTokens();
+
 const initialState: AuthState = {
   user: null,
-  accessToken: localStorage.getItem("token"),
-  refreshToken: localStorage.getItem("refreshToken"),
+  accessToken,
+  refreshToken,
   loading: false,
   error: null,
 
@@ -59,8 +63,11 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerThunk.fulfilled, (state) => {
+      .addCase(registerThunk.fulfilled, (state, action) => {
         state.loading = false;
+        state.user = action.payload.user;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken || null;
       })
       .addCase(registerThunk.rejected, (state, action) => {
         state.loading = false;
@@ -68,11 +75,23 @@ const authSlice = createSlice({
       })
 
       // LOGOUT
+      .addCase(logoutThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(logoutThunk.fulfilled, (state) => {
+        state.loading = false;
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
         state.error = null;
+      })
+      .addCase(logoutThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.error = action.payload || "Logout failed";
       })
 
       // SEND EMAIL

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { registerThunk } from "@/features/auth/auth.thunk";
+import { getRedirectPath } from "@/utils/jwt";
 import { toast } from "sonner";
 
 const Register = () => {
@@ -34,7 +35,7 @@ const Register = () => {
 
     if (registerThunk.fulfilled.match(result)) {
       toast.success("Đăng ký thành công");
-      navigate("/login");
+      navigate(getRedirectPath());
     } else {
       toast.error(result.payload || "Đăng ký thất bại");
     }

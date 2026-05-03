@@ -2,9 +2,20 @@ import { jwtDecode } from "jwt-decode";
 
 type JwtPayload = {
   email: string;
-  roles: string[];
+  roles: string[] | string;
   exp?: number;
 };
+
+const normalizeRoles = (roles: JwtPayload["roles"]): string[] => {
+  if (!roles) return [];
+  return Array.isArray(roles) ? roles : [roles];
+};
+
+const isAdminRole = (roles: string[]): boolean =>
+  roles.some((role) => ["ROLE_ADMIN", "ADMIN"].includes(role.toUpperCase()));
+
+const isSystemAdminRole = (roles: string[]): boolean =>
+  roles.some((role) => ["ROLE_SYSTEM_ADMIN", "SYSTEM_ADMIN"].includes(role.toUpperCase()));
 
 export const getUserFromToken = (): JwtPayload | null => {
   const token = localStorage.getItem("token");
@@ -32,16 +43,17 @@ export const isTokenValid = (): boolean => {
 
 export const getRedirectPath = (): string => {
   const user = getUserFromToken();
-
-  console.log("User from token:", user);
-  
   if (!user) return "/login";
 
-  if (user.roles.includes("ROLE_SYSTEM_ADMIN")) {
+  const roles = normalizeRoles(user.roles);
+
+  console.log("User roles:", roles);
+
+  if (isSystemAdminRole(roles)) {
     return "/system-admin";
   }
 
-  if (user.roles.includes("ROLE_ADMIN")) {
+  if (isAdminRole(roles)) {
     return "/admin/dashboard";
   }
 
