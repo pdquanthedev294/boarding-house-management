@@ -65,9 +65,14 @@ public class UserEntity extends Abstract<Long> implements UserDetails, Serializa
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return roles.stream()
       .map(r -> new SimpleGrantedAuthority(
-        "ROLE_" + r.getRole().getName()
+        "ROLE_" + r.getRole().getName().toUpperCase()
       ))
       .toList();
+  }
+
+  @Override
+  public String getUsername() {
+    return email;
   }
 
   @Override

@@ -18,7 +18,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
+    console.log("API Error:", error.response?.status, error.response?.data);
     if (
       originalRequest &&
       !originalRequest._retry &&
@@ -37,7 +37,7 @@ api.interceptors.response.use(
       try {
         const refreshResponse = await axios.post(
           "http://localhost:8080/auth/refresh-token",
-          refreshToken
+          { refreshToken }
         );
 
         const tokenData =

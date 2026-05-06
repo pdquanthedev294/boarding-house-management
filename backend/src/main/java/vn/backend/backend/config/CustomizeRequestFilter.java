@@ -80,6 +80,8 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
 
       UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
+      log.info("{}",userDetails);
+
       // validate token
       if (!jwtService.validateToken(token, TokenType.ACCESS_TOKEN, userDetails)) {
         writeError(response, request, "Invalid or expired token");
@@ -90,17 +92,18 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
       SecurityContextHolder.getContext().setAuthentication(authentication);
 
       filterChain.doFilter(request, response);
     } catch (Exception e) {
+      e.printStackTrace();
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
   }
 
 
   private static final List<BypassRule> RULES = List.of(
-    new BypassRule("/auth/access-token", "POST"),
     new BypassRule("/swagger-ui/**", null),
     new BypassRule("/v3/api-docs/**", null),
     new BypassRule("/auth/**", null),

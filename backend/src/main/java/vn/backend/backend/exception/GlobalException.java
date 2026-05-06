@@ -31,7 +31,6 @@ public class GlobalException {
   * */
   @ExceptionHandler({ConstraintViolationException.class,
     MissingServletRequestParameterException.class, MethodArgumentNotValidException.class})
-  @ResponseStatus(BAD_REQUEST)
   @ApiResponses(value = {
     @ApiResponse(responseCode = "400", description = "Bad Request",
       content = {@Content(mediaType = APPLICATION_JSON_VALUE,

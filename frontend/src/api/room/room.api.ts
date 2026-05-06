@@ -1,54 +1,82 @@
-import axiosInstance from "@/lib/axios";
+import api from "@/lib/axios";
+import type {
+  Room,
+  RoomListResponse,
+  RoomRequest,
+  RoomStatus,
+} from "@/types/room.types";
 import type { ApiResponse } from "@/types/api-response";
-import type { Room, RoomListResponse, RoomStatus } from "@/types/room.types";
 
 const BASE_URL = "/room";
 
 export const roomApi = {
-  // Get all rooms with pagination
-  getAllRooms: async (page = 0, size = 10): Promise<ApiResponse<RoomListResponse>> => {
-    const response = await axiosInstance.get<ApiResponse<RoomListResponse>>(
+  getAllRooms: async (
+    page = 0,
+    size = 10
+  ): Promise<ApiResponse<RoomListResponse>> => {
+    const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/list`,
-      {
-        params: { page, size },
-      }
+      { params: { page, size } }
     );
     return response.data;
   },
 
-  // Get rooms by building
   getRoomsByBuilding: async (
     buildingId: number,
     page = 0,
     size = 10
   ): Promise<ApiResponse<RoomListResponse>> => {
-    const response = await axiosInstance.get<ApiResponse<RoomListResponse>>(
+    const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/building/${buildingId}`,
-      {
-        params: { page, size },
-      }
+      { params: { page, size } }
     );
     return response.data;
   },
 
-  // Get rooms by status
   getRoomsByStatus: async (
     status: RoomStatus,
     page = 0,
     size = 10
   ): Promise<ApiResponse<RoomListResponse>> => {
-    const response = await axiosInstance.get<ApiResponse<RoomListResponse>>(
+    const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/status/${status}`,
-      {
-        params: { page, size },
-      }
+      { params: { page, size } }
     );
     return response.data;
   },
 
-  // Get room by id
   getRoomById: async (id: number): Promise<ApiResponse<Room>> => {
-    const response = await axiosInstance.get<ApiResponse<Room>>(`${BASE_URL}/${id}`);
+    const response = await api.get<ApiResponse<Room>>(
+      `${BASE_URL}/${id}`
+    );
+    return response.data;
+  },
+
+  createRoom: async (
+    data: RoomRequest
+  ): Promise<ApiResponse<Room>> => {
+    const response = await api.post<ApiResponse<Room>>(
+      `${BASE_URL}/create`,
+      data
+    );
+    return response.data;
+  },
+
+  updateRoom: async (
+    id: number,
+    data: RoomRequest
+  ): Promise<ApiResponse<Room>> => {
+    const response = await api.put<ApiResponse<Room>>(
+      `${BASE_URL}/update/${id}`,
+      data
+    );
+    return response.data;
+  },
+
+  deleteRoom: async (id: number): Promise<ApiResponse<void>> => {
+    const response = await api.delete<ApiResponse<void>>(
+      `${BASE_URL}/delete/${id}`
+    );
     return response.data;
   },
 };

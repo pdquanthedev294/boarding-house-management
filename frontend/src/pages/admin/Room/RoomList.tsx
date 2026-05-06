@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  fetchRoomsThunk,
-  fetchRoomsByStatusThunk,
-} from "@/features/room/room.thunk";
-import { setFilterStatus } from "@/features/room/room.slice";
+import { fetchRoomsThunk, fetchRoomsByStatusThunk, deleteRoomThunk } from "@/features/room/room.thunk";
 import { RoomStatus } from "@/types/room.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,16 +22,9 @@ const statusColors: Record<RoomStatus, string> = {
 
 const RoomList = () => {
   const dispatch = useAppDispatch();
-  const {
-    rooms,
-    loading,
-    error,
-    currentPage,
-    totalPages,
-    totalElements,
-    pageSize,
-    filterStatus,
-  } = useAppSelector((s) => s.room);
+  const navigate = useNavigate();
+  const { rooms, loading, submitting, error, currentPage, totalPages, totalElements, pageSize } =
+    useAppSelector((s) => s.room);
 
   const [searchRoom, setSearchRoom] = useState("");
   const [activeStatus, setActiveStatus] = useState<RoomStatus | null>(null);
@@ -55,16 +45,16 @@ const RoomList = () => {
 
   const handlePageChange = (newPage: number) => {
     if (activeStatus) {
-      dispatch(
-        fetchRoomsByStatusThunk({
-          status: activeStatus,
-          page: newPage,
-          size: pageSize,
-        })
-      );
+      dispatch(fetchRoomsByStatusThunk({ status: activeStatus, page: newPage, size: pageSize }));
     } else {
       dispatch(fetchRoomsThunk({ page: newPage, size: pageSize }));
     }
+  };
+
+  const handleDelete = async (id: number, roomNumber: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Bạn có chắc muốn xóa phòng ${roomNumber}?`)) return;
+    dispatch(deleteRoomThunk(id));
   };
 
   const filteredRooms = rooms.filter((room) =>
@@ -75,29 +65,33 @@ const RoomList = () => {
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            Danh sách phòng
-          </h1>
-          <p className="text-slate-600">
-            Quản lý và xem thông tin chi tiết về các phòng cho thuê
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-900 mb-2">Danh sách phòng</h1>
+            <p className="text-slate-600">Quản lý và xem thông tin chi tiết về các phòng cho thuê</p>
+          </div>
+          <Button
+            onClick={() => navigate("/admin/rooms/add")}
+            className="bg-violet-600 hover:bg-violet-700 text-white flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Thêm phòng
+          </Button>
         </div>
 
-        {/* ERROR ALERT */}
+        {/* ERROR */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700">{error}</p>
           </div>
         )}
 
-        {/* FILTERS SECTION */}
+        {/* FILTERS */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          {/* Search Box */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Tìm kiếm phòng
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Tìm kiếm phòng</label>
             <Input
               placeholder="Nhập số phòng (VD: 101, 202)..."
               value={searchRoom}
@@ -105,23 +99,15 @@ const RoomList = () => {
               className="w-full"
             />
           </div>
-
-          {/* Status Filter Buttons */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-3">
-              Lọc theo trạng thái
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-3">Lọc theo trạng thái</label>
             <div className="flex flex-wrap gap-2">
               {Object.values(RoomStatus).map((status) => (
                 <Button
                   key={status}
                   onClick={() => handleStatusFilter(status)}
                   variant={activeStatus === status ? "default" : "outline"}
-                  className={
-                    activeStatus === status
-                      ? "bg-violet-600 hover:bg-violet-700"
-                      : ""
-                  }
+                  className={activeStatus === status ? "bg-violet-600 hover:bg-violet-700" : ""}
                 >
                   {roomStatusLabels[status]}
                 </Button>
@@ -130,109 +116,86 @@ const RoomList = () => {
           </div>
         </div>
 
-        {/* ROOMS GRID */}
+        {/* GRID */}
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin">
-              <div className="h-12 w-12 border-4 border-violet-600 border-t-transparent rounded-full"></div>
-            </div>
+            <div className="h-12 w-12 border-4 border-violet-600 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filteredRooms.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-slate-400 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-              />
+            <svg className="mx-auto h-12 w-12 text-slate-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <h3 className="text-lg font-semibold text-slate-900 mb-1">
-              Không tìm thấy phòng
-            </h3>
-            <p className="text-slate-600">
-              Thử thay đổi bộ lọc hoặc tìm kiếm để xem phòng khác
-            </p>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Không tìm thấy phòng</h3>
+            <p className="text-slate-600">Thử thay đổi bộ lọc hoặc tìm kiếm để xem phòng khác</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredRooms.map((room) => (
               <div
                 key={room.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group"
+                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden cursor-pointer group"
+                onClick={() => navigate(`/admin/rooms/${room.id}`)}
               >
-                {/* Room Header */}
+                {/* Card Header */}
                 <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-4 text-white">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-2xl font-bold">#{room.roomNumber}</h3>
-                      <p className="text-violet-100 text-sm mt-1">
-                        {room.buildingName}
-                      </p>
+                      <p className="text-violet-100 text-sm mt-1">{room.buildingName}</p>
                     </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        statusColors[room.status]
-                      }`}
-                    >
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[room.status]}`}>
                       {roomStatusLabels[room.status]}
                     </span>
                   </div>
                 </div>
 
-                {/* Room Details */}
+                {/* Card Body */}
                 <div className="p-4 space-y-3">
-                  {/* Area */}
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600 text-sm">Diện tích</span>
-                    <span className="font-semibold text-slate-900">
-                      {room.area} m²
-                    </span>
+                    <span className="font-semibold text-slate-900">{room.area} m²</span>
                   </div>
-
-                  {/* People */}
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 text-sm">
-                      Số người tối đa
-                    </span>
-                    <span className="font-semibold text-slate-900">
-                      {room.maxPeople} người
-                    </span>
+                    <span className="text-slate-600 text-sm">Số người tối đa</span>
+                    <span className="font-semibold text-slate-900">{room.maxPeople} người</span>
                   </div>
-
-                  {/* Price */}
                   <div className="border-t pt-3">
                     <span className="text-slate-600 text-sm">Giá thuê/tháng</span>
                     <p className="text-2xl font-bold text-violet-600 mt-1">
                       {room.price.toLocaleString("vi-VN")}₫
                     </p>
                   </div>
-
-                  {/* Utilities */}
                   <div className="bg-slate-50 rounded-lg p-3 space-y-2">
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-600">Điện</span>
-                      <span className="font-medium">
-                        {room.electricPrice.toLocaleString("vi-VN")}₫/kWh
-                      </span>
+                      <span className="font-medium">{room.electricPrice.toLocaleString("vi-VN")}₫/kWh</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-600">Nước</span>
-                      <span className="font-medium">
-                        {room.waterPrice.toLocaleString("vi-VN")}₫/m³
-                      </span>
+                      <span className="font-medium">{room.waterPrice.toLocaleString("vi-VN")}₫/m³</span>
                     </div>
                   </div>
 
-                  {/* Action Button */}
-                  <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white mt-4">
-                    Xem chi tiết
-                  </Button>
+                  {/* Action buttons */}
+                  <div className="flex gap-2 pt-1">
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); navigate(`/admin/rooms/edit/${room.id}`); }}
+                      variant="outline"
+                      className="flex-1 text-xs h-8"
+                    >
+                      Chỉnh sửa
+                    </Button>
+                    <Button
+                      onClick={(e) => handleDelete(room.id, room.roomNumber, e)}
+                      variant="outline"
+                      disabled={submitting}
+                      className="flex-1 text-xs h-8 text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      Xóa
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -242,14 +205,9 @@ const RoomList = () => {
         {/* PAGINATION */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 mt-12">
-            <Button
-              variant="outline"
-              disabled={currentPage === 0}
-              onClick={() => handlePageChange(currentPage - 1)}
-            >
+            <Button variant="outline" disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
               Trước
             </Button>
-
             {Array.from({ length: totalPages }, (_, i) => (
               <Button
                 key={i}
@@ -260,12 +218,7 @@ const RoomList = () => {
                 {i + 1}
               </Button>
             ))}
-
-            <Button
-              variant="outline"
-              disabled={currentPage === totalPages - 1}
-              onClick={() => handlePageChange(currentPage + 1)}
-            >
+            <Button variant="outline" disabled={currentPage === totalPages - 1} onClick={() => handlePageChange(currentPage + 1)}>
               Sau
             </Button>
           </div>
@@ -279,15 +232,11 @@ const RoomList = () => {
           </div>
           <div className="bg-white rounded-lg p-4 text-center shadow-sm">
             <p className="text-slate-600 text-sm mb-1">Trang hiện tại</p>
-            <p className="text-3xl font-bold text-slate-900">
-              {currentPage + 1}/{totalPages}
-            </p>
+            <p className="text-3xl font-bold text-slate-900">{currentPage + 1}/{totalPages}</p>
           </div>
           <div className="bg-white rounded-lg p-4 text-center shadow-sm">
             <p className="text-slate-600 text-sm mb-1">Phòng trên trang</p>
-            <p className="text-3xl font-bold text-slate-900">
-              {filteredRooms.length}
-            </p>
+            <p className="text-3xl font-bold text-slate-900">{filteredRooms.length}</p>
           </div>
         </div>
       </div>

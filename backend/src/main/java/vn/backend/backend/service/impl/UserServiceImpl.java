@@ -3,26 +3,20 @@ package vn.backend.backend.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import vn.backend.backend.dto.request.user.UserAddressRequest;
 import vn.backend.backend.dto.request.user.ChangePasswordRequest;
 import vn.backend.backend.dto.request.user.CreateUserRequest;
 import vn.backend.backend.dto.request.user.UpdateUserRequest;
-import vn.backend.backend.dto.response.user.UserPageResponse;
 import vn.backend.backend.dto.response.user.UserResponse;
 import vn.backend.backend.entities.AddressEntity;
 import vn.backend.backend.entities.RoleEntity;
 import vn.backend.backend.entities.UserEntity;
 import vn.backend.backend.entities.UserHasRoleEntity;
-import vn.backend.backend.enums.Gender;
 import vn.backend.backend.enums.UserStatus;
-import vn.backend.backend.enums.UserType;
 import vn.backend.backend.exception.InvalidDataException;
 import vn.backend.backend.exception.ResourceNotFoundException;
 import vn.backend.backend.mapper.UserMapper;
@@ -33,11 +27,8 @@ import vn.backend.backend.repository.UserRepository;
 import vn.backend.backend.service.UserService;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 @Service
 @Slf4j(topic = "USER-SERVICE")
@@ -52,33 +43,36 @@ public class UserServiceImpl implements UserService {
   private final UserHasRoleRepository userHasRoleRepository;
 
   @Override
+  public Page<UserResponse> findAll(Pageable pageable) {
+    log.info("Get all users");
+
+    return userRepository.findAll(pageable)
+      .map(userMapper::toResponse);
+  }
+
+  @Override
   public UserResponse findById(Long id) {
     log.info("Find user by id: {}", id);
 
-    UserEntity userEntity = getUserEntity(id);
+    UserEntity user = getUserEntity(id);
 
-    return UserResponse.builder()
-      .id(id)
-      .firstName(userEntity.getFirstName())
-      .lastName(userEntity.getLastName())
-      .birthday(userEntity.getDateOfBirth())
-      .phone(userEntity.getPhone())
-      .email(userEntity.getEmail())
-      .username(userEntity.getUsername())
-      .gender(userEntity.getGender())
-      .type(userEntity.getType())
-      .status(userEntity.getStatus())
-      .build();
+    return userMapper.toResponse(user);
   }
 
   @Override
   public UserResponse findByUsername(String username) {
-    return null;
+
+    UserEntity user = userRepository.findByUsername(username);
+
+    return userMapper.toResponse(user);
   }
 
   @Override
   public UserResponse findByEmail(String email) {
-    return null;
+    UserEntity user = userRepository.findByEmail(email)
+      .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+    return userMapper.toResponse(user);
   }
 
   @Override
@@ -201,29 +195,5 @@ public class UserServiceImpl implements UserService {
 
   private UserEntity getUserEntity(Long id) {
     return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-  }
-
-  private static UserPageResponse getUserPageResponse(int page, int size, Page<UserEntity> userEntities) {
-    log.info("Convert User Entity Page: {}", userEntities);
-
-    List<UserResponse> userList = userEntities.stream().map((UserEntity entity) -> UserResponse.builder()
-      .id(entity.getId())
-      .firstName(entity.getFirstName())
-      .lastName(entity.getLastName())
-      .gender(entity.getGender())
-//      .birthday(entity.getDateOfBirth())
-      .username(entity.getUsername())
-      .phone(entity.getPhone())
-      .email(entity.getEmail())
-      .build()
-    ).toList();
-
-    UserPageResponse response = new UserPageResponse();
-    response.setPageNumber(page);
-    response.setPageSize(size);
-    response.setTotalElements(userEntities.getNumberOfElements());
-    response.setTotalPages(userEntities.getTotalPages());
-    response.setUsers(userList);
-    return response;
   }
 }

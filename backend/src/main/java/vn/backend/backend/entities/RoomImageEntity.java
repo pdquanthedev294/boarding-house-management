@@ -1,10 +1,15 @@
 package vn.backend.backend.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.*;
 
+@Entity
+@Table(name = "tbl_room_image")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RoomImageEntity extends Abstract<Long>{
   @Column(name = "image_url")
   private String imageUrl;

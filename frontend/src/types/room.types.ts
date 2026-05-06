@@ -24,6 +24,18 @@ export interface Room {
   updatedAt: string;
 }
 
+export interface RoomRequest {
+  roomNumber: string;
+  area: number;
+  price: number;
+  maxPeople: number;
+  status: RoomStatus;
+  electricPrice: number;
+  waterPrice: number;
+  buildingId: number;
+  managerId?: number | null;
+}
+
 export interface PaginationMeta {
   page: number;
   size: number;

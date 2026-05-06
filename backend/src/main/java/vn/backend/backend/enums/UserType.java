@@ -5,5 +5,6 @@ public enum UserType {
   LANDLORD,
   SYSTEM_ADMIN,
   ADMIN,
-  STAFF
+  STAFF,
+  TENANT
 }

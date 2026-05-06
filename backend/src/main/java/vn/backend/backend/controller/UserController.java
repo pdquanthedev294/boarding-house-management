@@ -6,8 +6,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.backend.backend.dto.request.user.ChangePasswordRequest;
 import vn.backend.backend.dto.request.user.CreateUserRequest;
@@ -27,81 +28,89 @@ public class UserController {
 
   private final UserService userService;
 
-//  @Operation(summary = "Get user list", description = "API retrieve user from db")
-//  @GetMapping("/list")
-//  public Map<String, Object> getList(@RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, @RequestParam(required = false) String sort) {
-//    log.info("Get user list");
-//
-//    Map<String, Object> result = new LinkedHashMap<>();
-//    result.put("status", HttpStatus.OK.value());
-//    result.put("message", "User list");
-//    result.put("data", userService.findAll(keyword, sort, page, size));
-//
-//    return result;
-//  }
+  @Operation(summary = "Get user list", description = "API retrieve user from db")
+  @GetMapping("/list")
+  public ApiResponse getAllUsers(
+    @RequestParam(defaultValue = "1") int page,
+    @RequestParam(defaultValue = "10") int size
+  ) {
+    log.info("GET /user/list");
+
+    if (page < 1) page = 1;
+
+    Pageable pageable = PageRequest.of(page - 1, size);
+
+    return ApiResponse.builder()
+      .status(200)
+      .message("Lấy danh sách user thành công")
+      .data(userService.findAll(pageable))
+      .build();
+  }
+
 
   @Operation(summary = "Get user detail", description = "API retrieve user detail by ID")
   @GetMapping("/{userId}")
-  public Map<String, Object> getUserDetail(@PathVariable @Min(value = 1, message = "UserId must be equals or greater than 1") Long userId) {
-    log.info("Get user detail by ID: {}", userId);
+  public ApiResponse getUserDetail(@PathVariable Long userId) {
+    log.info("GET /user/{}", userId);
 
-    Map<String, Object> result = new LinkedHashMap<>();
-    result.put("status", HttpStatus.OK.value());
-    result.put("message", "user");
-    result.put("data", userService.findById(userId));
-    return result;
+    return ApiResponse.builder()
+      .status(200)
+      .message("Lấy thông tin user thành công")
+      .data(userService.findById(userId))
+      .build();
   }
 
   @Operation(summary = "Create user", description = "API add new user to db")
-  @PostMapping("/add")
-  public ApiResponse createUser(@RequestBody @Valid CreateUserRequest request) {
+  @PostMapping("/create")
+  public ApiResponse createUser(@Valid @RequestBody CreateUserRequest request) {
+    log.info("POST /user/create");
+
     return ApiResponse.builder()
-      .status(HttpStatus.CREATED.value())
-      .message("User created successfully")
+      .status(201)
+      .message("Tạo user thành công")
       .data(userService.save(request))
       .build();
   }
 
   @Operation(summary = "Update user", description = "API update user to db")
-  @PutMapping("/upd")
-  public Map<String, Object> updateUser(@RequestBody @Valid UpdateUserRequest request) {
-    log.info("Update user: {}", request);
+  @PatchMapping("/update")
+  public ApiResponse updateUser(@Valid @RequestBody UpdateUserRequest request) {
+    log.info("PATCH /user/update");
 
     userService.update(request);
 
-    Map<String, Object> result = new LinkedHashMap<>();
-    result.put("status", HttpStatus.ACCEPTED.value());
-    result.put("message", "User updated successfully");
-    result.put("data", "");
-
-    return result;
+    return ApiResponse.builder()
+      .status(200)
+      .message("Cập nhật user thành công")
+      .data(null)
+      .build();
   }
 
   @Operation(summary = "Change password", description = "API change password for user to database")
-  @PatchMapping("/change-pwd")
-  public Map<String, Object> changePassword(@RequestBody ChangePasswordRequest request) {
-    log.info("Changing password for user: {}", request);
+  @PatchMapping("/change-password")
+  public ApiResponse changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    log.info("PATCH /user/change-password");
 
     userService.changePassword(request);
 
-    Map<String, Object> result = new LinkedHashMap<>();
-    result.put("status", HttpStatus.NO_CONTENT.value());
-    result.put("message", "Password updated successfully");
-    result.put("data", "");
-
-    return result;
+    return ApiResponse.builder()
+      .status(200)
+      .message("Đổi mật khẩu thành công")
+      .data(null)
+      .build();
   }
 
-  public Map<String, Object> deleteUser(@PathVariable Long userId) {
-    log.info("Deleting user: {}", userId);
+  @Operation(summary = "Delete user", description = "API delete user to database")
+  @DeleteMapping("/delete/{userId}")
+  public ApiResponse deleteUser(@PathVariable Long userId) {
+    log.info("DELETE /user/{}", userId);
 
     userService.delete(userId);
 
-    Map<String, Object> result = new LinkedHashMap<>();
-    result.put("status", HttpStatus.RESET_CONTENT.value());
-    result.put("message", "User deleted successfully");
-    result.put("data", "");
-
-    return result;
+    return ApiResponse.builder()
+      .status(200)
+      .message("Xóa user thành công")
+      .data(null)
+      .build();
   }
 }

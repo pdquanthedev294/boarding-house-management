@@ -12,7 +12,6 @@ import vn.backend.backend.enums.RoomStatus;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class RoomEntity extends Abstract<Long>{
   @Column(name = "room_number")
   private String roomNumber;

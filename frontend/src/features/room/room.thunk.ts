@@ -4,64 +4,41 @@ import {
   roomByBuildingService,
   roomByStatusService,
   roomDetailService,
+  createRoomService,
+  updateRoomService,
+  deleteRoomService,
 } from "@/services/room.service";
-import type { RoomStatus } from "@/types/room.types";
+import type { RoomRequest, RoomStatus } from "@/types/room.types";
 
 export const fetchRoomsThunk = createAsyncThunk(
   "room/fetchRooms",
-  async (
-    { page = 0, size = 10 }: { page?: number; size?: number },
-    { rejectWithValue }
-  ) => {
+  async ({ page = 0, size = 10 }: { page?: number; size?: number }, { rejectWithValue }) => {
     try {
-      const data = await roomListService(page, size);
-      return data;
+      return await roomListService(page, size);
     } catch (error: any) {
-      return rejectWithValue(
-        error.message || "Lấy danh sách phòng thất bại"
-      );
+      return rejectWithValue(error.message || "Lấy danh sách phòng thất bại");
     }
   }
 );
 
 export const fetchRoomsByBuildingThunk = createAsyncThunk(
   "room/fetchByBuilding",
-  async (
-    {
-      buildingId,
-      page = 0,
-      size = 10,
-    }: { buildingId: number; page?: number; size?: number },
-    { rejectWithValue }
-  ) => {
+  async ({ buildingId, page = 0, size = 10 }: { buildingId: number; page?: number; size?: number }, { rejectWithValue }) => {
     try {
-      const data = await roomByBuildingService(buildingId, page, size);
-      return data;
+      return await roomByBuildingService(buildingId, page, size);
     } catch (error: any) {
-      return rejectWithValue(
-        error.message || "Lấy danh sách phòng thất bại"
-      );
+      return rejectWithValue(error.message || "Lấy danh sách phòng thất bại");
     }
   }
 );
 
 export const fetchRoomsByStatusThunk = createAsyncThunk(
   "room/fetchByStatus",
-  async (
-    {
-      status,
-      page = 0,
-      size = 10,
-    }: { status: RoomStatus; page?: number; size?: number },
-    { rejectWithValue }
-  ) => {
+  async ({ status, page = 0, size = 10 }: { status: RoomStatus; page?: number; size?: number }, { rejectWithValue }) => {
     try {
-      const data = await roomByStatusService(status, page, size);
-      return data;
+      return await roomByStatusService(status, page, size);
     } catch (error: any) {
-      return rejectWithValue(
-        error.message || "Lấy danh sách phòng thất bại"
-      );
+      return rejectWithValue(error.message || "Lấy danh sách phòng thất bại");
     }
   }
 );
@@ -73,9 +50,41 @@ export const fetchRoomDetailThunk = createAsyncThunk(
       const data = await roomDetailService(id);
       return data.data;
     } catch (error: any) {
-      return rejectWithValue(
-        error.message || "Lấy chi tiết phòng thất bại"
-      );
+      return rejectWithValue(error.message || "Lấy chi tiết phòng thất bại");
+    }
+  }
+);
+
+export const createRoomThunk = createAsyncThunk(
+  "room/create",
+  async (data: RoomRequest, { rejectWithValue }) => {
+    try {
+      return await createRoomService(data);
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Tạo phòng thất bại");
+    }
+  }
+);
+
+export const updateRoomThunk = createAsyncThunk(
+  "room/update",
+  async ({ id, data }: { id: number; data: RoomRequest }, { rejectWithValue }) => {
+    try {
+      return await updateRoomService(id, data);
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Cập nhật phòng thất bại");
+    }
+  }
+);
+
+export const deleteRoomThunk = createAsyncThunk(
+  "room/delete",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      await deleteRoomService(id);
+      return id;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Xóa phòng thất bại");
     }
   }
 );

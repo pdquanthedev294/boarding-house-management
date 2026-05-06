@@ -9,11 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import vn.backend.backend.dto.request.auth.ForgotPasswordRequest;
-import vn.backend.backend.dto.request.auth.ResetPasswordRequest;
-import vn.backend.backend.dto.request.auth.SignUpRequest;
-import vn.backend.backend.dto.request.auth.SignInRequest;
-import vn.backend.backend.dto.request.auth.VerifyOtpRequest;
+import vn.backend.backend.dto.request.auth.*;
 import vn.backend.backend.dto.response.auth.TokenResponse;
 import vn.backend.backend.dto.response.common.ApiResponse;
 import vn.backend.backend.service.AuthenticationService;
@@ -29,7 +25,7 @@ public class AuthenticationController {
 
   @Operation(summary = "Access token", description = "Get access token and refresh token by username and password")
   @PostMapping("/access-token")
-  public ApiResponse getAccessToken(@RequestBody SignInRequest request) {
+  public ApiResponse getAccessToken(@Valid @RequestBody SignInRequest request) {
     log.info("Access token request");
 
     TokenResponse token = authenticationService.getAccessToken(request);
@@ -42,9 +38,9 @@ public class AuthenticationController {
 
   @Operation(summary = "Refresh token", description = "Get new access token by refresh token")
   @PostMapping("/refresh-token")
-  public ApiResponse getRefreshToken(@RequestBody String refreshToken) {
+  public ApiResponse getRefreshToken(@RequestBody RefreshTokenRequest request) {
     log.info("Refresh token request");
-    TokenResponse token = authenticationService.getRefreshToken(refreshToken);
+    TokenResponse token = authenticationService.getRefreshToken(request.getRefreshToken());
     return ApiResponse.builder()
       .status(200)
       .message("success")
@@ -54,7 +50,7 @@ public class AuthenticationController {
 
   @Operation(summary = "Register", description = "Create new user account")
   @PostMapping("/register")
-  public ApiResponse register(@RequestBody SignUpRequest request) {
+  public ApiResponse register(@Valid @RequestBody SignUpRequest request) {
     log.info("Register request: {}", request.getEmail());
 
     TokenResponse token = authenticationService.register(request);

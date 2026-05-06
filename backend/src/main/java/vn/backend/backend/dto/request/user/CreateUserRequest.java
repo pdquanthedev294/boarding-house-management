@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import vn.backend.backend.enums.Gender;
+import vn.backend.backend.enums.UserStatus;
+import vn.backend.backend.enums.UserType;
 
 import java.io.Serializable;
 import java.util.Date;

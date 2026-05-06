@@ -21,12 +21,13 @@ public class WebSecurityConfig {
     http
       .cors(cors -> {})
       .csrf(AbstractHttpConfigurer::disable)
+      .addFilterBefore(customizeRequestFilter, UsernamePasswordAuthenticationFilter.class)
       .sessionManagement(manager ->
         manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
       )
-      .addFilterBefore(customizeRequestFilter, UsernamePasswordAuthenticationFilter.class)
       .authorizeHttpRequests(request -> request
         .requestMatchers("/auth/**").permitAll()
+        .requestMatchers("/user/**").permitAll()
         .requestMatchers("/room/**").permitAll()
         .anyRequest().authenticated()
       );

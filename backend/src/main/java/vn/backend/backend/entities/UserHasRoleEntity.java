@@ -14,7 +14,7 @@ public class UserHasRoleEntity extends Abstract<Long> {
   @JoinColumn(name = "user_id")
   private UserEntity user;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "role_id")
   private RoleEntity role;
 }
