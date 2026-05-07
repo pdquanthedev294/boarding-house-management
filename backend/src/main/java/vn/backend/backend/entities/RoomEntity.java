@@ -3,6 +3,8 @@ package vn.backend.backend.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.type.SqlTypes;
 import vn.backend.backend.enums.RoomStatus;
 
@@ -10,6 +12,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "tbl_room")
+@SQLDelete(sql = "UPDATE tbl_room SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor

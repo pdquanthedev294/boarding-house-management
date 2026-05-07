@@ -11,57 +11,65 @@ const BASE_URL = "/room";
 
 export const roomApi = {
 
-  getAllRooms: async (page = 0, size = 2): Promise<ApiResponse<RoomListResponse>> => {
+  getAllRooms: async (page = 0, size = 2,): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/list`,
-      { params: { page, size } }
+      { params: { page, size } },
     );
     return response.data;
   },
 
-  getRoomsByBuilding: async (buildingId: number, page = 0, size = 2): Promise<ApiResponse<RoomListResponse>> => {
+  getRoomsByBuilding: async (buildingId: number, page = 0, size = 2,): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/building/${buildingId}`,
-      { params: { page, size } }
+      { params: { page, size } },
     );
     return response.data;
   },
 
-  getRoomsByStatus: async (status: RoomStatus, page = 0, size = 2): Promise<ApiResponse<RoomListResponse>> => {
+  getRoomsByStatus: async (status: RoomStatus, page = 0, size = 2,): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/status/${status}`,
-      { params: { page, size } }
+      { params: { page, size } },
     );
     return response.data;
   },
 
   getRoomById: async (id: number): Promise<ApiResponse<Room>> => {
-    const response = await api.get<ApiResponse<Room>>(
-      `${BASE_URL}/${id}`
-    );
+    const response = await api.get<ApiResponse<Room>>(`${BASE_URL}/${id}`);
     return response.data;
   },
 
   createRoom: async (data: RoomRequest): Promise<ApiResponse<Room>> => {
     const response = await api.post<ApiResponse<Room>>(
       `${BASE_URL}/create`,
-      data
+      data,
     );
     return response.data;
   },
 
-  updateRoom: async (id: number, data: RoomRequest): Promise<ApiResponse<Room>> => {
+  updateRoom: async (id: number, data: RoomRequest,): Promise<ApiResponse<Room>> => {
     const response = await api.put<ApiResponse<Room>>(
       `${BASE_URL}/update/${id}`,
-      data
+      data,
     );
     return response.data;
   },
 
   deleteRoom: async (id: number): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(
-      `${BASE_URL}/delete/${id}`
+      `${BASE_URL}/delete/${id}`,
     );
+    return response.data;
+  },
+
+  uploadRoomImage: async (formData: FormData) => {
+    const response = await api.post("/room/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
     return response.data;
   },
 };

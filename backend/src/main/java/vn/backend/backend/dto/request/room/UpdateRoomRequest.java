@@ -3,6 +3,7 @@ package vn.backend.backend.dto.request.room;
 import lombok.Getter;
 import vn.backend.backend.enums.RoomStatus;
 
+
 @Getter
 public class UpdateRoomRequest {
   private String roomNumber;
@@ -22,4 +23,6 @@ public class UpdateRoomRequest {
   private Long buildingId;
 
   private Long managerId;
+
+  private String imageUrl;
 }

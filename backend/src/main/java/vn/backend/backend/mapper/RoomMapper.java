@@ -56,5 +56,10 @@ public interface RoomMapper {
   @Mapping(target = "buildingName", source = "building.name")
   @Mapping(target = "managerId", source = "manager.id")
   @Mapping(target = "managerName", source = "manager.firstName")
+  @Mapping(
+    target = "imageUrl",
+    expression =
+      "java(entity.getImages() != null && !entity.getImages().isEmpty() ? entity.getImages().get(0).getImageUrl() : null)"
+  )
   RoomResponse toResponse(RoomEntity entity);
 }

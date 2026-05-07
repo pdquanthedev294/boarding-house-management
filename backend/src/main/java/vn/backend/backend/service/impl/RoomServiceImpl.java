@@ -33,7 +33,6 @@ public class RoomServiceImpl implements RoomService {
   private final BuildingRepository buildingRepository;
   private final UserRepository userRepository;
   private final RoomMapper roomMapper;
-  private final CloudinaryService cloudinaryService;
   private final RoomImageRepository roomImageRepository;
 
   @Override
@@ -93,20 +92,15 @@ public class RoomServiceImpl implements RoomService {
     RoomEntity savedRoom = roomRepository.save(room);
 
     // 2. Upload images to cloudinary
-    if (request.getImages() != null && !request.getImages().isEmpty()) {
+    if (request.getImageUrl() != null &&
+      !request.getImageUrl().isBlank()) {
 
-      List<RoomImageEntity> images = request.getImages().stream()
-        .map(file -> {
-          String url = cloudinaryService.uploadFile(file);
+      RoomImageEntity image = RoomImageEntity.builder()
+        .imageUrl(request.getImageUrl())
+        .room(savedRoom)
+        .build();
 
-          return RoomImageEntity.builder()
-            .imageUrl(url)
-            .room(savedRoom)
-            .build();
-        })
-        .toList();
-
-      roomImageRepository.saveAll(images);
+      roomImageRepository.save(image);
     }
 
     return roomMapper.toResponse(room);
@@ -129,6 +123,17 @@ public class RoomServiceImpl implements RoomService {
     }
 
     roomMapper.updateEntity(request, room, building, manager);
+
+    if (request.getImageUrl() != null &&
+      !request.getImageUrl().isBlank()) {
+
+      RoomImageEntity image = RoomImageEntity.builder()
+        .imageUrl(request.getImageUrl())
+        .room(room)
+        .build();
+
+      roomImageRepository.save(image);
+    }
 
     return roomMapper.toResponse(roomRepository.save(room));
   }

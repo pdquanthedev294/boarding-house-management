@@ -25,6 +25,7 @@ public class RoomResponse {
   private String buildingName;
   private Long managerId;
   private String managerName;
+  private String imageUrl;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 }

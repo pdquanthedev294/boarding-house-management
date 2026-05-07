@@ -42,3 +42,21 @@ export const updateRoomService = async (id: number, data: RoomRequest): Promise<
 export const deleteRoomService = async (id: number): Promise<void> => {
   await roomApi.deleteRoom(id);
 };
+
+export const uploadRoomImageService = async (file: File,): Promise<string> => {
+
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  const response =
+    await roomApi.uploadRoomImage(formData);
+
+  if (!response.data) {
+    throw new Error(
+      response.message || "Upload ảnh thất bại",
+    );
+  }
+
+  return response.data;
+};

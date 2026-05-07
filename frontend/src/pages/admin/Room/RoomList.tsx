@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/helper/formatCurrency";
 import Pagination from "@/components/common/Pagination";
+import { toast } from "sonner";
 
 const roomStatusLabels: Record<RoomStatus, string> = {
   [RoomStatus.AVAILABLE]: "Trống",
@@ -86,8 +87,26 @@ const RoomList = () => {
     e: React.MouseEvent,
   ) => {
     e.stopPropagation();
-    if (!confirm(`Bạn có chắc muốn xóa phòng ${roomNumber}?`)) return;
-    dispatch(deleteRoomThunk(id));
+
+    toast.warning(`Bạn có chắc muốn xóa phòng ${roomNumber}?`, {
+      action: {
+        label: "Xóa",
+        onClick: async () => {
+          const result = await dispatch(deleteRoomThunk(id));
+
+          if (result.meta.requestStatus === "fulfilled") {
+            toast.success("Xóa phòng thành công");
+          } else {
+            toast.error("Xóa phòng thất bại");
+          }
+        },
+      },
+
+      cancel: {
+        label: "Hủy",
+        onClick: () => {},
+      },
+    });
   };
 
   const filteredRooms = rooms.filter((room) =>
@@ -223,6 +242,20 @@ const RoomList = () => {
                   </div>
                 </div>
 
+                {/* Room Image */}
+                <div className="h-48 w-full overflow-hidden bg-slate-100">
+                  {room.imageUrl ? (
+                    <img
+                      src={room.imageUrl}
+                      alt={room.roomNumber}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+                      Không có ảnh
+                    </div>
+                  )}
+                </div>
                 {/* Card Body */}
                 <div className="p-4 space-y-3 flex flex-col flex-1">
                   <div className="flex items-center justify-between">
@@ -241,7 +274,7 @@ const RoomList = () => {
                         : "Chưa cập nhật"}
                     </span>
                   </div>
-                  
+
                   <div className="border-t pt-3 min-h-[90px]">
                     <span className="text-slate-600 text-sm">
                       Giá thuê/tháng

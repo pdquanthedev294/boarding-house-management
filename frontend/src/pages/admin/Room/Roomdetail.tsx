@@ -7,7 +7,11 @@ import {
 } from "@/features/room/room.thunk";
 import { clearSelectedRoom } from "@/features/room/room.slice";
 import { RoomStatus } from "@/types/room.types";
-import { formatCurrency, formatPeople, formatText } from "@/helper/formatCurrency";
+import {
+  formatCurrency,
+  formatPeople,
+  formatText,
+} from "@/helper/formatCurrency";
 
 const roomStatusLabels: Record<RoomStatus, string> = {
   [RoomStatus.AVAILABLE]: "Trống",
@@ -110,6 +114,24 @@ const RoomDetail = () => {
         </div>
 
         <div className="space-y-6">
+          {/* Ảnh phòng */}
+          {selectedRoom.imageUrl && (
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="p-4">
+                <h2 className="text-lg font-semibold text-slate-800">
+                  Ảnh phòng
+                </h2>
+              </div>
+
+              <div className="p-4">
+                <img
+                  src={selectedRoom.imageUrl}
+                  alt={`Room ${selectedRoom.roomNumber}`}
+                  className="w-full h-[400px] object-cover rounded-xl"
+                />
+              </div>
+            </div>
+          )}
           {/* Thông tin chính */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-6 text-white">

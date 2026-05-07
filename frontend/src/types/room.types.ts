@@ -5,7 +5,8 @@ export const RoomStatus = {
   RESERVED: "RESERVED",
 } as const;
 
-export type RoomStatus = (typeof RoomStatus)[keyof typeof RoomStatus];
+export type RoomStatus =
+  (typeof RoomStatus)[keyof typeof RoomStatus];
 
 export interface Room {
   id: number;
@@ -20,6 +21,9 @@ export interface Room {
   buildingName: string;
   managerId: number | null;
   managerName: string | null;
+
+  imageUrl?: string;
+
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +38,9 @@ export interface RoomRequest {
   waterPrice: number | null;
   buildingId: number;
   managerId?: number | null;
+
+  imageUrl?: string;
+  imageFile?: File | null;
 }
 
 export interface PaginationMeta {
@@ -45,10 +52,12 @@ export interface PaginationMeta {
 
 export interface RoomListResponse {
   content: Room[];
+
   pageable: {
     pageNumber: number;
     pageSize: number;
   };
+
   totalElements: number;
   totalPages: number;
   numberOfElements: number;
@@ -65,13 +74,16 @@ export interface RoomListRequest {
 export interface RoomState {
   rooms: Room[];
   selectedRoom: Room | null;
+
   loading: boolean;
   submitting: boolean;
   error: string | null;
+
   currentPage: number;
   totalPages: number;
   totalElements: number;
   pageSize: number;
+
   filterStatus: RoomStatus | null;
   filterBuildingId: number | null;
 }
