@@ -52,6 +52,11 @@ const Sidebar = () => {
           label: "Khách hàng",
           icon: UserCheck,
         },
+        {
+          to: "/admin/buildings",
+          label: "Danh sách toà nhà",
+          icon: Building2,
+        },
       ],
     },
     {

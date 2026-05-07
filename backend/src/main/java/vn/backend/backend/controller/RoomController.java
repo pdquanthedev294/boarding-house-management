@@ -6,11 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import vn.backend.backend.dto.request.room.CreateRoomRequest;
 import vn.backend.backend.dto.request.room.UpdateRoomRequest;
 import vn.backend.backend.dto.response.common.ApiResponse;
 import vn.backend.backend.enums.RoomStatus;
+import vn.backend.backend.service.CloudinaryService;
 import vn.backend.backend.service.RoomService;
 
 @RestController
@@ -21,15 +24,15 @@ import vn.backend.backend.service.RoomService;
 public class RoomController {
 
   private final RoomService roomService;
+  private final CloudinaryService cloudinaryService;
 
   @GetMapping("/list")
   public ApiResponse getAllRooms(
-    @RequestParam(defaultValue = "1") int page,
-    @RequestParam(defaultValue = "10") int size
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "2") int size
   ) {
-    if (page < 1) page = 1;
 
-    Pageable pageable = PageRequest.of(page - 1, size);
+    Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "id");
 
     return ApiResponse.builder()
       .status(200)
@@ -44,9 +47,7 @@ public class RoomController {
     @RequestParam(defaultValue = "1") int page,
     @RequestParam(defaultValue = "10") int size
   ) {
-    if (page < 1) page = 1;
-
-    Pageable pageable = PageRequest.of(page - 1, size);
+    Pageable pageable = PageRequest.of(page, size);
 
     return ApiResponse.builder()
       .status(200)
@@ -61,9 +62,7 @@ public class RoomController {
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "10") int size
   ) {
-    if (page < 1) page = 1;
-
-    Pageable pageable = PageRequest.of(page - 1, size);
+    Pageable pageable = PageRequest.of(page, size);
 
     return ApiResponse.builder()
       .status(200)
@@ -92,6 +91,30 @@ public class RoomController {
       .message("Tạo phòng thành công")
       .data(roomService.createRoom(request))
       .build();
+  }
+
+  @PostMapping(value = "/upload", consumes = "multipart/form-data")
+  public ApiResponse uploadImage(@RequestParam("file") MultipartFile file) {
+    log.info("POST /upload");
+
+    try {
+      String imageUrl = cloudinaryService.uploadFile(file);
+
+      return ApiResponse.builder()
+        .status(200)
+        .message("Upload ảnh thành công")
+        .data(imageUrl)
+        .build();
+
+    } catch (Exception e) {
+      log.error("Upload image failed", e);
+
+      return ApiResponse.builder()
+        .status(400)
+        .message("Upload ảnh thất bại")
+        .data(null)
+        .build();
+    }
   }
 
   @PatchMapping("/update/{id}")

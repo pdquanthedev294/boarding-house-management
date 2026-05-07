@@ -6,6 +6,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import vn.backend.backend.enums.RoomStatus;
 
+import java.util.List;
+
 @Entity
 @Table(name = "tbl_room")
 @Getter
@@ -42,4 +44,7 @@ public class RoomEntity extends Abstract<Long>{
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "manager_id")
   private UserEntity manager;
+
+  @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+  private List<RoomImageEntity> images;
 }

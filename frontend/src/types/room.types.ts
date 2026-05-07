@@ -11,11 +11,11 @@ export interface Room {
   id: number;
   roomNumber: string;
   area: number;
-  price: number;
-  maxPeople: number;
+  price: number | null;
+  maxPeople: number | null;
   status: RoomStatus;
-  electricPrice: number;
-  waterPrice: number;
+  electricPrice: number | null;
+  waterPrice: number | null;
   buildingId: number;
   buildingName: string;
   managerId: number | null;
@@ -27,11 +27,11 @@ export interface Room {
 export interface RoomRequest {
   roomNumber: string;
   area: number;
-  price: number;
-  maxPeople: number;
+  price: number | null;
+  maxPeople: number | null;
   status: RoomStatus;
-  electricPrice: number;
-  waterPrice: number;
+  electricPrice: number | null;
+  waterPrice: number | null;
   buildingId: number;
   managerId?: number | null;
 }
@@ -60,4 +60,18 @@ export interface RoomListRequest {
   size?: number;
   buildingId?: number;
   status?: RoomStatus;
+}
+
+export interface RoomState {
+  rooms: Room[];
+  selectedRoom: Room | null;
+  loading: boolean;
+  submitting: boolean;
+  error: string | null;
+  currentPage: number;
+  totalPages: number;
+  totalElements: number;
+  pageSize: number;
+  filterStatus: RoomStatus | null;
+  filterBuildingId: number | null;
 }

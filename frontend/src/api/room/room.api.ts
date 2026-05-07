@@ -10,10 +10,8 @@ import type { ApiResponse } from "@/types/api-response";
 const BASE_URL = "/room";
 
 export const roomApi = {
-  getAllRooms: async (
-    page = 0,
-    size = 10
-  ): Promise<ApiResponse<RoomListResponse>> => {
+
+  getAllRooms: async (page = 0, size = 2): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/list`,
       { params: { page, size } }
@@ -21,11 +19,7 @@ export const roomApi = {
     return response.data;
   },
 
-  getRoomsByBuilding: async (
-    buildingId: number,
-    page = 0,
-    size = 10
-  ): Promise<ApiResponse<RoomListResponse>> => {
+  getRoomsByBuilding: async (buildingId: number, page = 0, size = 2): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/building/${buildingId}`,
       { params: { page, size } }
@@ -33,11 +27,7 @@ export const roomApi = {
     return response.data;
   },
 
-  getRoomsByStatus: async (
-    status: RoomStatus,
-    page = 0,
-    size = 10
-  ): Promise<ApiResponse<RoomListResponse>> => {
+  getRoomsByStatus: async (status: RoomStatus, page = 0, size = 2): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
       `${BASE_URL}/status/${status}`,
       { params: { page, size } }
@@ -52,9 +42,7 @@ export const roomApi = {
     return response.data;
   },
 
-  createRoom: async (
-    data: RoomRequest
-  ): Promise<ApiResponse<Room>> => {
+  createRoom: async (data: RoomRequest): Promise<ApiResponse<Room>> => {
     const response = await api.post<ApiResponse<Room>>(
       `${BASE_URL}/create`,
       data
@@ -62,10 +50,7 @@ export const roomApi = {
     return response.data;
   },
 
-  updateRoom: async (
-    id: number,
-    data: RoomRequest
-  ): Promise<ApiResponse<Room>> => {
+  updateRoom: async (id: number, data: RoomRequest): Promise<ApiResponse<Room>> => {
     const response = await api.put<ApiResponse<Room>>(
       `${BASE_URL}/update/${id}`,
       data

@@ -1,5 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+
 import type { AuthState } from "@/types/auth.types";
+
 import {
   forgotPasswordThunk,
   loginThunk,
@@ -12,7 +14,16 @@ import {
 
 import { getAuthTokens } from "./auth.utils";
 
-const { accessToken, refreshToken } = getAuthTokens();
+import {
+  clearAuth,
+  resetForgotPasswordState,
+  setAuth,
+  setError,
+  setLoading,
+} from "./auth.helpers";
+
+const { accessToken, refreshToken } =
+  getAuthTokens();
 
 const initialState: AuthState = {
   user: null,
@@ -28,132 +39,85 @@ const initialState: AuthState = {
 
 const authSlice = createSlice({
   name: "auth",
+
   initialState,
+
   reducers: {
     setStep: (state, action) => {
       state.step = action.payload;
     },
 
-    resetForgotFlow: (state) => {
-      state.step = 1;
-      state.forgotEmail = null;
-      state.otpExpire = 0;
-    },
+    resetForgotFlow: resetForgotPasswordState,
   },
+
   extraReducers: (builder) => {
+    // LOGIN
     builder
-      // LOGIN
-      .addCase(loginThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(loginThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken || null;
-      })
-      .addCase(loginThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Login failed";
-      })
+      .addCase(loginThunk.pending, setLoading)
+      .addCase(loginThunk.fulfilled, setAuth)
+      .addCase(loginThunk.rejected, setError);
 
-      // REGISTER
-      .addCase(registerThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(registerThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken || null;
-      })
-      .addCase(registerThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Register failed";
-      })
+    // REGISTER
+    builder
+      .addCase(registerThunk.pending, setLoading)
+      .addCase(registerThunk.fulfilled, setAuth)
+      .addCase(registerThunk.rejected, setError);
 
-      // LOGOUT
-      .addCase(logoutThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(logoutThunk.fulfilled, (state) => {
-        state.loading = false;
-        state.user = null;
-        state.accessToken = null;
-        state.refreshToken = null;
-        state.error = null;
-      })
+    // LOGOUT
+    builder
+      .addCase(logoutThunk.pending, setLoading)
+      .addCase(logoutThunk.fulfilled, clearAuth)
       .addCase(logoutThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.user = null;
-        state.accessToken = null;
-        state.refreshToken = null;
+        clearAuth(state);
         state.error = action.payload || "Logout failed";
-      })
+      });
 
-      // SEND EMAIL
-      .addCase(forgotPasswordThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(forgotPasswordThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.forgotEmail = action.meta.arg.email;
-        state.step = 2;
-        state.otpExpire = Date.now() + 600000; // 10 phút
-      })
-      .addCase(forgotPasswordThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Gửi mã OTP thất bại";
-      })
+    // SEND OTP
+    builder
+      .addCase(forgotPasswordThunk.pending, setLoading)
+      .addCase(
+        forgotPasswordThunk.fulfilled,
+        (state, action) => {
+          state.loading = false;
+          state.forgotEmail = action.meta.arg.email;
+          state.step = 2;
+          state.otpExpire = Date.now() + 600000;
+        }
+      )
+      .addCase(forgotPasswordThunk.rejected, setError);
 
-      // VERIFY OTP
-      .addCase(verifyOtpThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
+    // VERIFY OTP
+    builder
+      .addCase(verifyOtpThunk.pending, setLoading)
       .addCase(verifyOtpThunk.fulfilled, (state) => {
         state.loading = false;
         state.step = 3;
       })
-      .addCase(verifyOtpThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Xác thực OTP thất bại";
-      })
+      .addCase(verifyOtpThunk.rejected, setError);
 
-      // RESET PASSWORD
-      .addCase(resetPasswordThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
+    // RESET PASSWORD
+    builder
+      .addCase(resetPasswordThunk.pending, setLoading)
       .addCase(resetPasswordThunk.fulfilled, (state) => {
         state.loading = false;
-        state.step = 1;
-        state.forgotEmail = null;
-        state.error = null;
+        resetForgotPasswordState(state);
       })
-      .addCase(resetPasswordThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Đặt lại mật khẩu thất bại";
-      })
+      .addCase(resetPasswordThunk.rejected, setError);
 
-      // RESEND OTP
-      .addCase(resendOtpThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
+    // RESEND OTP
+    builder
+      .addCase(resendOtpThunk.pending, setLoading)
       .addCase(resendOtpThunk.fulfilled, (state) => {
         state.loading = false;
-        state.otpExpire = Date.now() + 600000; // 10 phút
+        state.otpExpire = Date.now() + 600000;
       })
-      .addCase(resendOtpThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Gửi lại OTP thất bại";
-      });
+      .addCase(resendOtpThunk.rejected, setError);
   },
 });
+
+export const {
+  setStep,
+  resetForgotFlow,
+} = authSlice.actions;
 
 export default authSlice.reducer;

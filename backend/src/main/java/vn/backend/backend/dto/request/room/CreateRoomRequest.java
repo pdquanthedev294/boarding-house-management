@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 import vn.backend.backend.enums.RoomStatus;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,4 +44,6 @@ public class CreateRoomRequest {
   private Long buildingId;
 
   private Long managerId;
+
+  private List<MultipartFile> images;
 }

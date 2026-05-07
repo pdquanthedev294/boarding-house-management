@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+
 import {
   fetchRoomsThunk,
   fetchRoomsByBuildingThunk,
@@ -8,21 +9,18 @@ import {
   updateRoomThunk,
   deleteRoomThunk,
 } from "./room.thunk";
-import type { Room, RoomStatus } from "@/types/room.types";
 
-interface RoomState {
-  rooms: Room[];
-  selectedRoom: Room | null;
-  loading: boolean;
-  submitting: boolean; // cho create/update/delete
-  error: string | null;
-  currentPage: number;
-  totalPages: number;
-  totalElements: number;
-  pageSize: number;
-  filterStatus: RoomStatus | null;
-  filterBuildingId: number | null;
-}
+import type { RoomState } from "@/types/room.types";
+
+import {
+  setLoading,
+  setSubmitting,
+  setError,
+  setRoomList,
+  addRoom,
+  updateRoom,
+  removeRoom,
+} from "./room.helpers";
 
 const initialState: RoomState = {
   rooms: [],
@@ -33,7 +31,7 @@ const initialState: RoomState = {
   currentPage: 0,
   totalPages: 0,
   totalElements: 0,
-  pageSize: 10,
+  pageSize: 2,
   filterStatus: null,
   filterBuildingId: null,
 };
@@ -41,116 +39,83 @@ const initialState: RoomState = {
 const roomSlice = createSlice({
   name: "room",
   initialState,
+
   reducers: {
-    clearError: (state) => { state.error = null; },
-    clearSelectedRoom: (state) => { state.selectedRoom = null; },
-    setPageSize: (state, action) => { state.pageSize = action.payload; },
-    setFilterStatus: (state, action) => { state.filterStatus = action.payload; },
-    setFilterBuildingId: (state, action) => { state.filterBuildingId = action.payload; },
+    clearError: (state) => {
+      state.error = null;
+    },
+
+    clearSelectedRoom: (state) => {
+      state.selectedRoom = null;
+    },
+
+    setPageSize: (state, action) => {
+      state.pageSize = action.payload;
+    },
+
+    setFilterStatus: (state, action) => {
+      state.filterStatus = action.payload;
+    },
+
+    setFilterBuildingId: (state, action) => {
+      state.filterBuildingId = action.payload;
+    },
   },
+
   extraReducers: (builder) => {
     // Fetch all
     builder
-      .addCase(fetchRoomsThunk.pending, (state) => { state.loading = true; state.error = null; })
-      .addCase(fetchRoomsThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.rooms = action.payload.content;
-        state.currentPage = action.payload.pageable.pageNumber;
-        state.pageSize = action.payload.pageable.pageSize;
-        state.totalPages = action.payload.totalPages;
-        state.totalElements = action.payload.totalElements;
-      })
-      .addCase(fetchRoomsThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+      .addCase(fetchRoomsThunk.pending, setLoading)
+      .addCase(fetchRoomsThunk.fulfilled, setRoomList)
+      .addCase(fetchRoomsThunk.rejected, setError);
 
     // Fetch by building
     builder
-      .addCase(fetchRoomsByBuildingThunk.pending, (state) => { state.loading = true; state.error = null; })
-      .addCase(fetchRoomsByBuildingThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.rooms = action.payload.content;
-        state.currentPage = action.payload.pageable.pageNumber;
-        state.pageSize = action.payload.pageable.pageSize;
-        state.totalPages = action.payload.totalPages;
-        state.totalElements = action.payload.totalElements;
-      })
-      .addCase(fetchRoomsByBuildingThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+      .addCase(fetchRoomsByBuildingThunk.pending, setLoading)
+      .addCase(fetchRoomsByBuildingThunk.fulfilled, setRoomList)
+      .addCase(fetchRoomsByBuildingThunk.rejected, setError);
 
     // Fetch by status
     builder
-      .addCase(fetchRoomsByStatusThunk.pending, (state) => { state.loading = true; state.error = null; })
-      .addCase(fetchRoomsByStatusThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.rooms = action.payload.content;
-        state.currentPage = action.payload.pageable.pageNumber;
-        state.pageSize = action.payload.pageable.pageSize;
-        state.totalPages = action.payload.totalPages;
-        state.totalElements = action.payload.totalElements;
-      })
-      .addCase(fetchRoomsByStatusThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+      .addCase(fetchRoomsByStatusThunk.pending, setLoading)
+      .addCase(fetchRoomsByStatusThunk.fulfilled, setRoomList)
+      .addCase(fetchRoomsByStatusThunk.rejected, setError);
 
-    // Fetch detail
+    // Detail
     builder
-      .addCase(fetchRoomDetailThunk.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchRoomDetailThunk.pending, setLoading)
       .addCase(fetchRoomDetailThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.selectedRoom = action.payload ?? null;
+        state.selectedRoom = action.payload;
       })
-      .addCase(fetchRoomDetailThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+      .addCase(fetchRoomDetailThunk.rejected, setError);
 
     // Create
     builder
-      .addCase(createRoomThunk.pending, (state) => { state.submitting = true; state.error = null; })
-      .addCase(createRoomThunk.fulfilled, (state, action) => {
-        state.submitting = false;
-        state.rooms.unshift(action.payload);
-        state.totalElements += 1;
-      })
-      .addCase(createRoomThunk.rejected, (state, action) => {
-        state.submitting = false;
-        state.error = action.payload as string;
-      });
+      .addCase(createRoomThunk.pending, setSubmitting)
+      .addCase(createRoomThunk.fulfilled, addRoom)
+      .addCase(createRoomThunk.rejected, setError);
 
     // Update
     builder
-      .addCase(updateRoomThunk.pending, (state) => { state.submitting = true; state.error = null; })
-      .addCase(updateRoomThunk.fulfilled, (state, action) => {
-        state.submitting = false;
-        const idx = state.rooms.findIndex((r) => r.id === action.payload.id);
-        if (idx !== -1) state.rooms[idx] = action.payload;
-        if (state.selectedRoom?.id === action.payload.id) state.selectedRoom = action.payload;
-      })
-      .addCase(updateRoomThunk.rejected, (state, action) => {
-        state.submitting = false;
-        state.error = action.payload as string;
-      });
+      .addCase(updateRoomThunk.pending, setSubmitting)
+      .addCase(updateRoomThunk.fulfilled, updateRoom)
+      .addCase(updateRoomThunk.rejected, setError);
 
     // Delete
     builder
-      .addCase(deleteRoomThunk.pending, (state) => { state.submitting = true; state.error = null; })
-      .addCase(deleteRoomThunk.fulfilled, (state, action) => {
-        state.submitting = false;
-        state.rooms = state.rooms.filter((r) => r.id !== action.payload);
-        state.totalElements -= 1;
-      })
-      .addCase(deleteRoomThunk.rejected, (state, action) => {
-        state.submitting = false;
-        state.error = action.payload as string;
-      });
+      .addCase(deleteRoomThunk.pending, setSubmitting)
+      .addCase(deleteRoomThunk.fulfilled, removeRoom)
+      .addCase(deleteRoomThunk.rejected, setError);
   },
 });
 
-export const { clearError, clearSelectedRoom, setPageSize, setFilterStatus, setFilterBuildingId } =
-  roomSlice.actions;
+export const {
+  clearError,
+  clearSelectedRoom,
+  setPageSize,
+  setFilterStatus,
+  setFilterBuildingId,
+} = roomSlice.actions;
+
 export default roomSlice.reducer;

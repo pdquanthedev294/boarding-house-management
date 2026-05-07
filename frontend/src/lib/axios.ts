@@ -18,18 +18,15 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
     console.log("API Error:", error.response?.status, error.response?.data);
-    if (
-      originalRequest &&
-      !originalRequest._retry &&
-      error.response &&
-      [401, 403].includes(error.response.status) &&
-      !originalRequest.url?.includes("/auth/access-token") &&
-      !originalRequest.url?.includes("/auth/refresh-token")
-    ) {
+
+    if (originalRequest && !originalRequest._retry && error.response && [401, 403].includes(error.response.status) && !originalRequest.url?.includes("/auth/access-token") && !originalRequest.url?.includes("/auth/refresh-token")) {
+      
       originalRequest._retry = true;
 
       const refreshToken = localStorage.getItem("refreshToken");
+
       if (!refreshToken) {
         return Promise.reject(error);
       }
@@ -40,10 +37,10 @@ api.interceptors.response.use(
           { refreshToken }
         );
 
-        const tokenData =
-          refreshResponse.data?.data ?? refreshResponse.data;
-        const accessToken = tokenData?.accessToken;
-        const newRefreshToken = tokenData?.refreshToken;
+        console.log("Refresh Token Response:", refreshResponse.data);
+
+        const accessToken = refreshResponse.data?.data?.accessToken;
+        const newRefreshToken = refreshResponse.data?.data?.refreshToken;
 
         if (accessToken) {
           localStorage.setItem("token", accessToken);
@@ -53,6 +50,7 @@ api.interceptors.response.use(
           }
 
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
           return api(originalRequest);
         }
       } catch (refreshError) {

@@ -51,6 +51,7 @@ const RoomForm = () => {
     return () => {
       dispatch(clearSelectedRoom());
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const initialForm: RoomRequest = useMemo(() => {
@@ -70,7 +71,6 @@ const RoomForm = () => {
     return defaultForm;
   }, [isEdit, selectedRoom]);
 
-  
   // Thêm useEffect này để sync khi selectedRoom load xong
   useEffect(() => {
     if (isEdit && selectedRoom && !initializedRef.current) {
@@ -81,21 +81,30 @@ const RoomForm = () => {
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof RoomRequest, string>> = {};
-    if (!form.roomNumber.trim())
-      newErrors.roomNumber = "Số phòng không được để trống";
+
+    if (!form.roomNumber.trim()) newErrors.roomNumber = "Số phòng không được để trống";
+
     if (form.area <= 0) newErrors.area = "Diện tích phải lớn hơn 0";
-    if (form.price < 0) newErrors.price = "Giá thuê không được âm";
-    if (form.maxPeople < 1)
-      newErrors.maxPeople = "Số người tối đa phải ít nhất 1";
-    if (form.electricPrice < 0)
-      newErrors.electricPrice = "Giá điện không được âm";
-    if (form.waterPrice < 0) newErrors.waterPrice = "Giá nước không được âm";
+
+    if ((form.price ?? 0) <= 0) newErrors.price = "Giá thuê phải lớn hơn 0";
+  
+    if ((form.maxPeople ?? 0) < 1) newErrors.maxPeople = "Số người tối đa phải ít nhất 1";
+
+    if ((form.electricPrice ?? 0) <= 0) newErrors.electricPrice = "Giá điện không được âm";
+
+    if ((form.waterPrice ?? 0) <= 0) newErrors.waterPrice = "Giá nước không được âm";
+
     if (!form.buildingId) newErrors.buildingId = "Vui lòng nhập ID tòa nhà";
+
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (field: keyof RoomRequest, value: string | number | null) => {
+  const handleChange = (
+    field: keyof RoomRequest,
+    value: string | number | null,
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
@@ -157,7 +166,7 @@ const RoomForm = () => {
         <div className="bg-white rounded-xl shadow-sm p-8 space-y-6">
           {/* Thông tin cơ bản */}
           <div>
-            <h2 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b">
+            <h2 className="text-lg font-semibold text-slate-800 mb-4 pb-2">
               Thông tin cơ bản
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -274,7 +283,7 @@ const RoomForm = () => {
 
           {/* Giá cả */}
           <div>
-            <h2 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b">
+            <h2 className="text-lg font-semibold text-slate-800 mb-4 pb-2">
               Giá cả
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -339,7 +348,7 @@ const RoomForm = () => {
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-3 pt-4">
             <Button
               variant="outline"
               onClick={() => navigate("/admin/rooms")}

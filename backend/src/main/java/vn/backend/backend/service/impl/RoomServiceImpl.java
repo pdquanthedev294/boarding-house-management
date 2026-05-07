@@ -10,14 +10,19 @@ import vn.backend.backend.dto.request.room.UpdateRoomRequest;
 import vn.backend.backend.dto.response.room.RoomResponse;
 import vn.backend.backend.entities.BuildingEntity;
 import vn.backend.backend.entities.RoomEntity;
+import vn.backend.backend.entities.RoomImageEntity;
 import vn.backend.backend.entities.UserEntity;
 import vn.backend.backend.enums.RoomStatus;
 import vn.backend.backend.exception.ResourceNotFoundException;
 import vn.backend.backend.mapper.RoomMapper;
 import vn.backend.backend.repository.BuildingRepository;
+import vn.backend.backend.repository.RoomImageRepository;
 import vn.backend.backend.repository.RoomRepository;
 import vn.backend.backend.repository.UserRepository;
+import vn.backend.backend.service.CloudinaryService;
 import vn.backend.backend.service.RoomService;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,8 @@ public class RoomServiceImpl implements RoomService {
   private final BuildingRepository buildingRepository;
   private final UserRepository userRepository;
   private final RoomMapper roomMapper;
+  private final CloudinaryService cloudinaryService;
+  private final RoomImageRepository roomImageRepository;
 
   @Override
   public Page<RoomResponse> getAllRooms(Pageable pageable) {
@@ -81,9 +88,28 @@ public class RoomServiceImpl implements RoomService {
         .orElseThrow(() -> new ResourceNotFoundException("Người quản lý không tồn tại"));
     }
 
+    // 1. Save room
     RoomEntity room = roomMapper.toEntity(request, building, manager);
+    RoomEntity savedRoom = roomRepository.save(room);
 
-    return roomMapper.toResponse(roomRepository.save(room));
+    // 2. Upload images to cloudinary
+    if (request.getImages() != null && !request.getImages().isEmpty()) {
+
+      List<RoomImageEntity> images = request.getImages().stream()
+        .map(file -> {
+          String url = cloudinaryService.uploadFile(file);
+
+          return RoomImageEntity.builder()
+            .imageUrl(url)
+            .room(savedRoom)
+            .build();
+        })
+        .toList();
+
+      roomImageRepository.saveAll(images);
+    }
+
+    return roomMapper.toResponse(room);
   }
 
   @Override

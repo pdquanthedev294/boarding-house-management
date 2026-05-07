@@ -1,5 +1,5 @@
 import AdminLayout from "@/layouts/admin/AdminLayout";
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/common/RequireAuth";
 import dashoardRoutes from "./dashboard.routes";
 import roomRoutes from "./room.routes";
 

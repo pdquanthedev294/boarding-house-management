@@ -100,7 +100,7 @@ export const forgotPasswordThunk = createAsyncThunk<
     if (res.status >= 400) {
       return rejectWithValue(res.message || "Gửi mã OTP thất bại");
     }
-  } catch (error) {
+  } catch {
     return rejectWithValue("Gửi mã OTP thất bại");
   }
 });
@@ -116,7 +116,7 @@ export const verifyOtpThunk = createAsyncThunk<
     if (res.status >= 400) {
       return rejectWithValue(res.message || "Xác thực OTP thất bại");
     }
-  } catch (error) {
+  } catch {
     return rejectWithValue("Xác thực OTP thất bại");
   }
 });
@@ -132,7 +132,7 @@ export const resetPasswordThunk = createAsyncThunk<
     if (res.status >= 400) {
       return rejectWithValue(res.message || "Đặt lại mật khẩu thất bại");
     }
-  } catch (error) {
+  } catch {
     return rejectWithValue("Đặt lại mật khẩu thất bại");
   }
 });
@@ -148,7 +148,7 @@ export const resendOtpThunk = createAsyncThunk<
     if (res.status >= 400) {
       return rejectWithValue(res.message || "Gửi lại OTP thất bại");
     }
-  } catch (error) {
+  } catch {
     return rejectWithValue("Gửi lại OTP thất bại");
   }
 });
