@@ -1,6 +1,7 @@
 package vn.backend.backend.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,7 @@ import vn.backend.backend.repository.UserRepository;
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
+@Slf4j(topic = "SECURITY-CONFIG")
 public class SecurityConfig {
 
   private final UserRepository userRepository;

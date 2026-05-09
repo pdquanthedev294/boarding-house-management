@@ -133,7 +133,7 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
     error.setStatus(HttpServletResponse.SC_FORBIDDEN);
     error.setMessage(message);
 
-    response.setStatus(HttpServletResponse.SC_OK);
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
 

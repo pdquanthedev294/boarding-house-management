@@ -1,6 +1,6 @@
 import AdminLayout from "@/layouts/admin/AdminLayout";
 import RequireAuth from "@/components/common/RequireAuth";
-import dashoardRoutes from "./dashboard.routes";
+import dashboardRoutes from "./dashboard.routes";
 import roomRoutes from "./room.routes";
 
 const adminRoutes = [
@@ -9,17 +9,19 @@ const adminRoutes = [
       {
         path: "/admin",
         element: (
-          <RequireAuth>
+          <RequireAuth
+            allowedRoles={["ROLE_ADMIN", "ADMIN"]}
+          >
             <AdminLayout />
           </RequireAuth>
         ),
         children: [
-          ...dashoardRoutes,
+          ...dashboardRoutes,
           ...roomRoutes,
-        ]
-      }
-    ]
-  }
-]
+        ],
+      },
+    ],
+  },
+];
 
 export default adminRoutes;

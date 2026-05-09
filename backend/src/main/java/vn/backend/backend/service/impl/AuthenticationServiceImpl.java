@@ -219,8 +219,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     userRepository.save(user);
 
     // 5. lấy role mặc định
-    RoleEntity role = roleRepository.findByName("user")
-      .orElseThrow(() -> new RuntimeException("Role USER not found"));
+    RoleEntity role = roleRepository.findByName("TENANT")
+      .orElseThrow(() -> new RuntimeException("Role TENANT not found"));
 
     log.info("Role = {}", role);
 

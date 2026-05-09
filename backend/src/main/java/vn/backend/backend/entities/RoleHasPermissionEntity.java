@@ -15,7 +15,7 @@ public class RoleHasPermissionEntity extends Abstract<Long>{
   @JoinColumn(name = "role_id")
   private RoleEntity role;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "permission_id")
   private PermissionEntity permission;
 }

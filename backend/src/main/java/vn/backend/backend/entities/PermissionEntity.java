@@ -1,9 +1,10 @@
 package vn.backend.backend.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "tbl_permission")
@@ -18,4 +19,7 @@ public class PermissionEntity extends Abstract<Long> {
 
   @Column(name = "description")
   private String description;
+
+  @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY)
+  private Set<RoleHasPermissionEntity> roles = new HashSet<>();
 }

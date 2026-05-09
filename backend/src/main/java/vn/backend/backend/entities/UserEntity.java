@@ -63,11 +63,37 @@ public class UserEntity extends Abstract<Long> implements UserDetails, Serializa
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return roles.stream()
-      .map(r -> new SimpleGrantedAuthority(
-        "ROLE_" + r.getRole().getName().toUpperCase()
-      ))
-      .toList();
+    Set<GrantedAuthority> authorities = new HashSet<>();
+
+    for (UserHasRoleEntity userRole : roles) {
+
+      RoleEntity role = userRole.getRole();
+
+      // ROLE
+      authorities.add(
+        new SimpleGrantedAuthority(
+          "ROLE_" + role.getName().toUpperCase()
+        )
+      );
+
+      // PERMISSION
+      if (role.getPermissions() != null) {
+
+        role.getPermissions().forEach(rolePermission -> {
+
+          authorities.add(
+            new SimpleGrantedAuthority(
+              rolePermission
+                .getPermission()
+                .getName()
+            )
+          );
+
+        });
+      }
+    }
+
+    return authorities;
   }
 
   @Override
