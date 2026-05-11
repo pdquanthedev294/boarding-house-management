@@ -1,7 +1,9 @@
 import axios from "axios";
 
+import { API_ENDPOINTS, } from "@/constants/endpoints";
+
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -21,8 +23,10 @@ api.interceptors.response.use(
 
     console.log("API Error:", error.response?.status, error.response?.data);
 
-    if (originalRequest && !originalRequest._retry && error.response && [401, 403].includes(error.response.status) && !originalRequest.url?.includes("/auth/access-token") && !originalRequest.url?.includes("/auth/refresh-token")) {
-      
+    if (originalRequest && !originalRequest._retry && error.response && [401, 403].includes(error.response.status) &&
+      !originalRequest.url?.includes("/auth/access-token") &&
+      !originalRequest.url?.includes("/auth/refresh-token")
+    ) {
       originalRequest._retry = true;
 
       const refreshToken = localStorage.getItem("refreshToken");
@@ -32,12 +36,9 @@ api.interceptors.response.use(
       }
 
       try {
-        const refreshResponse = await axios.post(
-          "http://localhost:8080/auth/refresh-token",
-          { refreshToken }
-        );
-
-        console.log("Refresh Token Response:", refreshResponse.data);
+        const refreshResponse = await api.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN, {
+          refreshToken,
+        });
 
         const accessToken = refreshResponse.data?.data?.accessToken;
         const newRefreshToken = refreshResponse.data?.data?.refreshToken;
@@ -61,7 +62,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

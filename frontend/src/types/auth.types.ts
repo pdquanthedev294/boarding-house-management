@@ -64,3 +64,8 @@ export interface ResetPasswordRequest {
   newPassword: string;
   confirmPassword: string;
 }
+
+export type TokenResponse = {
+  accessToken: string;
+  refreshToken?: string;
+};

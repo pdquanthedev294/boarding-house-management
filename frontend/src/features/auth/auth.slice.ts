@@ -22,8 +22,7 @@ import {
   setLoading,
 } from "./auth.helpers";
 
-const { accessToken, refreshToken } =
-  getAuthTokens();
+const { accessToken, refreshToken } = getAuthTokens();
 
 const initialState: AuthState = {
   user: null,

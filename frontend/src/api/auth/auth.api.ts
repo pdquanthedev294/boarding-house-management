@@ -5,34 +5,31 @@ import type {
   ResetPasswordRequest,
   VerifyOtpRequest,
   ForgotPasswordRequest,
+  TokenResponse,
 } from "@/types/auth.types";
 import type { ApiResponse } from "@/types/api-response";
 
-// response data
-type TokenResponse = {
-  accessToken: string;
-  refreshToken?: string;
-};
+import { API_ENDPOINTS } from "@/constants/endpoints";
 
 export const authApi = {
   login: (data: LoginRequest) =>
-    api.post<ApiResponse<TokenResponse>>("/auth/access-token", data),
+    api.post<ApiResponse<TokenResponse>>(API_ENDPOINTS.AUTH.LOGIN, data),
 
   refreshToken: (refreshToken: string) =>
-    api.post<ApiResponse<TokenResponse>>("/auth/refresh-token", refreshToken),
+    api.post<ApiResponse<TokenResponse>>(API_ENDPOINTS.AUTH.REFRESH_TOKEN, { refreshToken }),
 
   register: (data: RegisterRequest) =>
-    api.post<ApiResponse<TokenResponse>>("/auth/register", data),
+    api.post<ApiResponse<TokenResponse>>(API_ENDPOINTS.AUTH.REGISTER, data),
 
   logout: () =>
-    api.post<ApiResponse<null>>("/auth/logout"),
+    api.post<ApiResponse<null>>(API_ENDPOINTS.AUTH.LOGOUT),
 
   forgotPassword: (data: ForgotPasswordRequest) =>
-    api.post<ApiResponse<null>>("/auth/forgot-password", data),
+    api.post<ApiResponse<null>>(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, data),
 
   verifyOtp: (data: VerifyOtpRequest) =>
-    api.post<ApiResponse<null>>("/auth/verify-otp", data),
+    api.post<ApiResponse<null>>(API_ENDPOINTS.AUTH.VERIFY_OTP, data),
 
   resetPassword: (data: ResetPasswordRequest) =>
-    api.post<ApiResponse<null>>("/auth/reset-password", data),
+    api.post<ApiResponse<null>>(API_ENDPOINTS.AUTH.RESET_PASSWORD, data),
 };

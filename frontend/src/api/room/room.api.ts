@@ -7,50 +7,63 @@ import type {
 } from "@/types/room.types";
 import type { ApiResponse } from "@/types/api-response";
 
-const BASE_URL = "/room";
+import { API_ENDPOINTS } from "@/constants/endpoints";
 
 export const roomApi = {
-
-  getAllRooms: async (page = 0, size = 2,): Promise<ApiResponse<RoomListResponse>> => {
+  getAllRooms: async (
+    page = 0,
+    size = 2,
+  ): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
-      `${BASE_URL}/list`,
+      API_ENDPOINTS.ROOM.LIST,
       { params: { page, size } },
     );
     return response.data;
   },
 
-  getRoomsByBuilding: async (buildingId: number, page = 0, size = 2,): Promise<ApiResponse<RoomListResponse>> => {
+  getRoomsByBuilding: async (
+    buildingId: number,
+    page = 0,
+    size = 2,
+  ): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
-      `${BASE_URL}/building/${buildingId}`,
+      API_ENDPOINTS.ROOM.GET_BY_BUILDING(buildingId),
       { params: { page, size } },
     );
     return response.data;
   },
 
-  getRoomsByStatus: async (status: RoomStatus, page = 0, size = 2,): Promise<ApiResponse<RoomListResponse>> => {
+  getRoomsByStatus: async (
+    status: RoomStatus,
+    page = 0,
+    size = 2,
+  ): Promise<ApiResponse<RoomListResponse>> => {
     const response = await api.get<ApiResponse<RoomListResponse>>(
-      `${BASE_URL}/status/${status}`,
+      API_ENDPOINTS.ROOM.GET_BY_STATUS(status),
       { params: { page, size } },
     );
     return response.data;
   },
 
   getRoomById: async (id: number): Promise<ApiResponse<Room>> => {
-    const response = await api.get<ApiResponse<Room>>(`${BASE_URL}/${id}`);
+    const response = await api.get<ApiResponse<Room>>(API_ENDPOINTS.ROOM.GET_BY_ID(id));
     return response.data;
   },
 
   createRoom: async (data: RoomRequest): Promise<ApiResponse<Room>> => {
     const response = await api.post<ApiResponse<Room>>(
-      `${BASE_URL}/create`,
+      API_ENDPOINTS.ROOM.CREATE,
       data,
     );
     return response.data;
   },
 
-  updateRoom: async (id: number, data: RoomRequest,): Promise<ApiResponse<Room>> => {
+  updateRoom: async (
+    id: number,
+    data: RoomRequest,
+  ): Promise<ApiResponse<Room>> => {
     const response = await api.put<ApiResponse<Room>>(
-      `${BASE_URL}/update/${id}`,
+      API_ENDPOINTS.ROOM.UPDATE(id),
       data,
     );
     return response.data;
@@ -58,13 +71,13 @@ export const roomApi = {
 
   deleteRoom: async (id: number): Promise<ApiResponse<void>> => {
     const response = await api.delete<ApiResponse<void>>(
-      `${BASE_URL}/delete/${id}`,
+      API_ENDPOINTS.ROOM.DELETE(id),
     );
     return response.data;
   },
 
   uploadRoomImage: async (formData: FormData) => {
-    const response = await api.post("/room/upload", formData, {
+    const response = await api.post(API_ENDPOINTS.ROOM.UPLOAD_IMAGE, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

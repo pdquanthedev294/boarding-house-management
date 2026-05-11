@@ -6,11 +6,8 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-const Pagination = ({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: PaginationProps) => {
+const Pagination = ({ currentPage, totalPages, onPageChange, }: PaginationProps) => {
+
   if (totalPages <= 1) return null;
 
   return (

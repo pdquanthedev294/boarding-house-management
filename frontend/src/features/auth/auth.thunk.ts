@@ -23,6 +23,7 @@ export const loginThunk = createAsyncThunk<
   LoginRequest,
   { rejectValue: string }
 >("auth/login", async (data, { rejectWithValue }) => {
+
   const res = await loginService(data);
 
   if (res.status >= 400) {
@@ -97,6 +98,7 @@ export const forgotPasswordThunk = createAsyncThunk<
 >("auth/forgot-password", async (data, { rejectWithValue }) => {
   try {
     const res = await forgotPasswordService(data);
+
     if (res.status >= 400) {
       return rejectWithValue(res.message || "Gửi mã OTP thất bại");
     }
@@ -113,6 +115,7 @@ export const verifyOtpThunk = createAsyncThunk<
 >("auth/verify-otp", async (data, { rejectWithValue }) => {
   try {
     const res = await verifyOtpService(data);
+
     if (res.status >= 400) {
       return rejectWithValue(res.message || "Xác thực OTP thất bại");
     }
@@ -129,6 +132,7 @@ export const resetPasswordThunk = createAsyncThunk<
 >("auth/reset-password", async (data, { rejectWithValue }) => {
   try {
     const res = await resetPasswordService(data);
+
     if (res.status >= 400) {
       return rejectWithValue(res.message || "Đặt lại mật khẩu thất bại");
     }
@@ -145,6 +149,7 @@ export const resendOtpThunk = createAsyncThunk<
 >("auth/resend-otp", async (data, { rejectWithValue }) => {
   try {
     const res = await forgotPasswordService(data);
+    
     if (res.status >= 400) {
       return rejectWithValue(res.message || "Gửi lại OTP thất bại");
     }
